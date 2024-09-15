@@ -1,5 +1,54 @@
 {% extends 'base.html' %}
 
 {% block body %}
-{{ template_data.message }}
+    {% if template_data.status == 'success' %}
+        <div class="alert alert-success" role="alert" style="margin-bottom: 20px;">
+            {{ template_data.message }}
+        </div>
+    {% elif template_data.status == 'warning' %}
+        <div class="alert alert-warning" role="alert" style="margin-bottom: 20px;">
+            {{ template_data.message }}
+        </div>
+    {% elif template_data.status == 'error' %}
+        <div class="alert alert-danger" role="alert" style="margin-bottom: 20px;">
+            {{ template_data.message }}
+        </div>
+    {% endif %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h3>Input</h3>
+                {% block input_section %}
+                {% endblock input_section %}
+            </div>
+            <div class="col">
+                <h3>Table</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Iteration</th>
+                            <th>xi</th>
+                            <th>f(xi)</th>
+                            <th>Absolute Error</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in template_data.table %}
+                            <tr>
+                                {% for cell in row %}
+                                    <td>{{ cell }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4">No data available</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 {% endblock body %}

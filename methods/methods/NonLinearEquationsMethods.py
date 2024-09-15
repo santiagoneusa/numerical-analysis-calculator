@@ -8,20 +8,12 @@ class NonLinearEquationsMethods():
             raise ValueError("The function must have opposite signs at a and b")
         
         if function(a) == 0:
-            return {
-                'status': '',
-                'message': f'The solution was found on x = {a} with a value of f(x) = {function(a)}',
-                'function': function,
-                'table': [[0, a, function(a), 0]],
-            }
+            table = [[0, a, function(a), 0]]
+            return NonLinearEquationsMethods.create_response(table)
         
         if function(b) == 0:
-            return {
-                'status': '',
-                'message': f'The solution was found on x = {b} with a value of f(x) = {function(b)}',
-                'function': function,
-                'table': [[0, b, function(b), 0]],
-            }
+            table = [[0, b, function(b), 0]]
+            return NonLinearEquationsMethods.create_response(table)
         
         iteration = 1
         error = 100
@@ -39,19 +31,13 @@ class NonLinearEquationsMethods():
             iteration += 1
 
         if iteration == iterations_limit:
-            return {
-                'status': 'warning',
-                'message': 'The iterations limit was reached',
-                'function': function,
-                'table': table,
-            }
+            return NonLinearEquationsMethods.create_response(
+                table = table,
+                status = 'warning',
+                message = 'The iterations limit was reached',
+            )
 
-        return {
-            'status': '',
-            'message': f'The solution was found on x = {table[iteration-1][1]} with a value of f(x) = {table[iteration-1][2]}',
-            'function': function,
-            'table': table,
-        }
+        return NonLinearEquationsMethods.create_response(table)
             
     @staticmethod
     def fixed_point():
@@ -76,3 +62,12 @@ class NonLinearEquationsMethods():
     @staticmethod
     def multiple_roots_v2():
         pass
+
+    @staticmethod
+    def create_response(table, status = 'success', message = None):
+        if not message: message = f'The solution was found on x = {table[-1][1]} with a value of f(x) = {table[-1][2]}'
+        return {
+            'status': status,
+            'message': message,
+            'table': table,
+        }

@@ -14,14 +14,18 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-height: 50vh;
+            padding-top: 40px;
+            padding-bottom: 40px;
         }
     </style>
 </head>
 <body class="index-page">
     {% include 'partials/navbar.html' %}
-
+    
     <div class="main-container">
+        <div class="text-center" style="margin-bottom: 30px;">
+            <h1>{{ template_data.title }}</h1>
+        </div>
         <main class="main container ">
             {% block body %}
             {% endblock body %}
