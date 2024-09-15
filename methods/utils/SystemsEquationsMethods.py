@@ -1,16 +1,4 @@
-class SystemsEquationMethods():
-
-    @staticmethod
-    def gaussian_elimination_simple():
-        pass
-
-    @staticmethod
-    def gaussian_elimination_partial_pivot():
-        pass
-
-    @staticmethod
-    def gaussian_elimination_total_pivot():
-        pass
+class SystemsEquationsMethods():
 
     @staticmethod
     def direct_factorization_lu_simple():
