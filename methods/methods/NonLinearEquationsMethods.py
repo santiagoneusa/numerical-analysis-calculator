@@ -1,4 +1,5 @@
 import numpy as np
+from methods.utils.ResponseManager import ResponseManager
 
 class NonLinearEquationsMethods():
 
@@ -9,11 +10,11 @@ class NonLinearEquationsMethods():
         
         if function(a) == 0:
             table = [[0, a, function(a), 0]]
-            return NonLinearEquationsMethods.create_response(table)
+            return ResponseManager.success_response(table)
         
         if function(b) == 0:
             table = [[0, b, function(b), 0]]
-            return NonLinearEquationsMethods.create_response(table)
+            return ResponseManager.success_response(table)
         
         iteration = 1
         error = 100
@@ -31,13 +32,14 @@ class NonLinearEquationsMethods():
             iteration += 1
 
         if iteration == iterations_limit:
-            return NonLinearEquationsMethods.create_response(
-                table = table,
-                status = 'warning',
-                message = 'The iterations limit was reached',
-            )
+            # Change this for ResponseManager.warning_response()
+            return {
+                'table': table,
+                'status': 'warning',
+                'message': 'The iterations limit was reached',
+            }
 
-        return NonLinearEquationsMethods.create_response(table)
+        return ResponseManager.success_response(table)
             
     @staticmethod
     def fixed_point():
@@ -62,12 +64,3 @@ class NonLinearEquationsMethods():
     @staticmethod
     def multiple_roots_v2():
         pass
-
-    @staticmethod
-    def create_response(table, status = 'success', message = None):
-        if not message: message = f'The solution was found on x = {table[-1][1]} with a value of f(x) = {table[-1][2]}'
-        return {
-            'status': status,
-            'message': message,
-            'table': table,
-        }
