@@ -1,7 +1,8 @@
 from django.shortcuts import render
+from methods.utils.ResponseManager import ResponseManager
 from methods.utils.MathEquationsManager import MathEquationsManager
 from methods.methods.NonLinearEquationsMethods import NonLinearEquationsMethods
-
+    
 def bisection(request):
     title = 'Bisection method'
     try:
@@ -14,23 +15,14 @@ def bisection(request):
 
             template_data = NonLinearEquationsMethods.bisection(a, b, function, tolerance, iterations_limit)
             template_data['title'] = title
-            
             return render(request, 'bisection.html', {'template_data': template_data})
         
         else:
-            # change this to ResponseManager.error_response('All the inputs must have a value.')
-            template_data = {
-                'title': title,
-                'status': 'error',
-                'message': 'All the inputs must have a value.',
-            }
+            template_data = ResponseManager.error_response('All the inputs must have a value.')
+            template_data['title'] = title
             return render(request, 'bisection.html', {'template_data': template_data})
         
     except Exception as e:
-        # change this to ResponseManager.error_response(e)
-        template_data = {
-            'title': title,
-            'status': 'error',
-            'message': f'An error ocurred: {e}.',
-        }
+        template_data = ResponseManager.error_response(e)
+        template_data['title'] = title
         return render(request, 'bisection.html', {'template_data': template_data})

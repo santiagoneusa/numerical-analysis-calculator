@@ -32,14 +32,9 @@ class NonLinearEquationsMethods():
             iteration += 1
 
         if iteration == iterations_limit:
-            # Change this for ResponseManager.warning_response()
-            return {
-                'table': table,
-                'status': 'warning',
-                'message': 'The iterations limit was reached',
-            }
-
-        return ResponseManager.success_response(table)
+            return ResponseManager.warning_response(table)
+        else:
+            return ResponseManager.success_response(table)
             
     @staticmethod
     def fixed_point():
