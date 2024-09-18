@@ -1,26 +1,28 @@
-class ResponseManager():
+class ResponseManager:
 
     @staticmethod
-    def success_response(table, message = None):
-        if not message: message = f'The solution was found on x = {table[-1][1]} with a value of f(x) = {table[-1][2]}'
+    def success_response(table, message=None):
+        if not message:
+            message = f"The solution was found on x = {table[-1][1]} with a value of f(x) = {table[-1][2]}"
         return {
-            'status': 'success',
-            'message': message,
-            'table': table,
+            "status": "success",
+            "message": message,
+            "table": table,
         }
 
     @staticmethod
-    def warning_response(table, message = None):
-        if not message: message = 'The iterations limit was reached'
+    def warning_response(table, message=None):
+        if not message:
+            message = "The iterations limit was reached"
         return {
-            'status': 'warning',
-            'message': f'Warning: {message}',
-            'table': table,
+            "status": "warning",
+            "message": f"Warning: {message}",
+            "table": table,
         }
 
     @staticmethod
     def error_response(error):
         return {
-            'status': 'error',
-            'message': f'An error ocurred: {error}',
+            "status": "error",
+            "message": f"An error ocurred: {error}",
         }

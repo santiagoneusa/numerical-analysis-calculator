@@ -1,5 +1,5 @@
-class InterpolationMethods():
-    
+class InterpolationMethods:
+
     @staticmethod
     def vandermonde():
         pass
@@ -23,4 +23,3 @@ class InterpolationMethods():
     @staticmethod
     def spline_cubic():
         pass
-

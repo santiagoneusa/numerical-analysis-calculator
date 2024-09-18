@@ -1,4 +1,4 @@
-class SystemsEquationsMethods():
+class SystemsEquationsMethods:
 
     @staticmethod
     def direct_factorization_lu_simple():
