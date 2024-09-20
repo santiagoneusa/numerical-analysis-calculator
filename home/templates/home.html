@@ -1,5 +1,138 @@
 {% extends 'base.html' %}
 
 {% block body %}
-{{ template_data.message }}
-{% endblock body %}
+<div id="homeCarousel" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+  </div>
+  <div class="carousel-inner">
+    <div class="carousel-item active" onclick="window.location.href='{% url 'about' %}'" style="background-color: #007bff; height: 400px;">
+      <div class="d-flex align-items-center justify-content-center h-100">
+        <div class="text-center text-white">
+          <h2 class="display-4">About Us</h2>
+          <p class="lead">Learn more about our calculator app and its features.</p>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-item" onclick="window.location.href='{% url 'guide' %}'" style="background-color: #28a745; height: 400px;">
+      <div class="d-flex align-items-center justify-content-center h-100">
+        <div class="text-center text-white">
+          <h2 class="display-4">User Guide</h2>
+          <p class="lead">Get started with our comprehensive user guide.</p>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-item" onclick="window.location.href='{% url 'problems' %}'" style="background-color: #8a2be2; height: 400px;">
+      <div class="d-flex align-items-center justify-content-center h-100">
+        <div class="text-center text-white">
+          <h2 class="display-4">Common Problems</h2>
+          <p class="lead">Find solutions to frequently encountered issues.</p>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-item" onclick="document.getElementById('methods-section').scrollIntoView({behavior: 'smooth'})" style="background-color: #dc3545; height: 400px;">
+      <div class="d-flex align-items-center justify-content-center h-100">
+        <div class="text-center text-white">
+          <h2 class="display-4">Methods</h2>
+          <p class="lead">Explore our calculation methods and tools.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+<hr class="mt-4 mb-5">
+
+<div class="container mt-5" id="methods-section">
+  <h2 class="mb-4 text-center">Methods</h2>
+  
+  <div class="row">
+    <div class="col-12 mb-5">
+      <h4 class="mb-3">Non-Linear Equations</h4>
+      <div class="row row-cols-1 row-cols-md-4 g-4">
+        <div class="col">
+          <a href="{% url 'methods.bisection' %}" class="btn btn-outline-primary w-100 h-100">Bisection Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.fixed_point' %}" class="btn btn-outline-primary w-100 h-100">Fixed Point Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.false_position' %}" class="btn btn-outline-primary w-100 h-100">False Position Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.newton_raphson' %}" class="btn btn-outline-primary w-100 h-100">Newton's Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.secant' %}" class="btn btn-outline-primary w-100 h-100">Secant Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.multiple_roots_v1' %}" class="btn btn-outline-primary w-100 h-100">Multiple Roots Method v1</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.multiple_roots_v2' %}" class="btn btn-outline-primary w-100 h-100">Multiple Roots Method v2</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-12 mb-5">
+      <h4 class="mb-3">Systems of Equations</h4>
+      <div class="row row-cols-1 row-cols-md-4 g-4">
+        <div class="col">
+          <a href="{% url 'methods.direct_factorization_lu_simple' %}" class="btn btn-outline-primary w-100 h-100">Direct Factorization LU Simple</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.direct_factorization_lu_partial' %}" class="btn btn-outline-primary w-100 h-100">Direct Factorization LU Partial</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.croult' %}" class="btn btn-outline-primary w-100 h-100">CROUT Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.doolittle' %}" class="btn btn-outline-primary w-100 h-100">Doolittle Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.cholesky' %}" class="btn btn-outline-primary w-100 h-100">Cholesky Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.jacobi' %}" class="btn btn-outline-primary w-100 h-100">Jacobi Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.gauss_seidel' %}" class="btn btn-outline-primary w-100 h-100">Gauss-Seidel Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.sor' %}" class="btn btn-outline-primary w-100 h-100">SOR Method</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-12 mb-5">
+      <h4 class="mb-3">Interpolation</h4>
+      <div class="row row-cols-1 row-cols-md-4 g-4">
+        <div class="col">
+          <a href="{% url 'methods.vandermonde' %}" class="btn btn-outline-primary w-100 h-100">Vandermonde Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.newton_divided_difference' %}" class="btn btn-outline-primary w-100 h-100">Newton Divided Difference</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.lagrange' %}" class="btn btn-outline-primary w-100 h-100">Lagrange Method</a>
+        </div>
+        <div class="col">
+          <a href="{% url 'methods.spline_linear' %}" class="btn btn-outline-primary w-100 h-100">Spline Linear</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
