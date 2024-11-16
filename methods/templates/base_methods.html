@@ -34,7 +34,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for row in template_data.table %}
+                        {% for row in template_data.response.table %}
                             <tr>
                                 {% for cell in row %}
                                     <td>{{ cell }}</td>

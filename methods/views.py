@@ -6,12 +6,13 @@ from django.urls import reverse
 
 
 def bisection(request):
-    title = "Bisection method"
-    breadcrumbs = [
+    template_data["title"] = "Bisection method"
+    template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
         ("Non Linear Equations", reverse("home") + "#methods-section"),
         ("Bisection", reverse("methods.bisection"))
     ]
+
     try:
         if request.POST:
             a = float(request.POST.get("a"))
@@ -20,25 +21,20 @@ def bisection(request):
             tolerance = float(request.POST.get("correct_decimals"))
             iterations_limit = int(request.POST.get("iterations_limit"))
 
-            template_data = NonLinearEquationsMethods.bisection(
+            template_data["response"] = NonLinearEquationsMethods.bisection(
                 a, b, function, tolerance, iterations_limit
             )
-            template_data["title"] = title
-            template_data["breadcrumbs"] = breadcrumbs
-            return render(request, "bisection.html", {"template_data": template_data})
 
+            return render(request, "bisection.html", {"template_data": template_data})
         else:
-            template_data = ResponseManager.error_response(
+            template_data["response"] = ResponseManager.error_response(
                 "All the inputs must have a value."
             )
-            template_data["title"] = title
-            template_data["breadcrumbs"] = breadcrumbs
+
             return render(request, "bisection.html", {"template_data": template_data})
 
     except Exception as e:
         template_data = ResponseManager.error_response(e)
-        template_data["title"] = title
-        template_data["breadcrumbs"] = breadcrumbs
         return render(request, "bisection.html", {"template_data": template_data})
 
 def fixed_point(request):
