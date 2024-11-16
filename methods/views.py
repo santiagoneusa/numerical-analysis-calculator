@@ -17,9 +17,7 @@ def bisection(request):
             a = float(request.POST.get("a"))
             b = float(request.POST.get("b"))
             function = MathEquationsManager.parse_function(request.POST.get("function"))
-            tolerance = MathEquationsManager.get_tolerance(
-                int(request.POST.get("correct_decimals"))
-            )
+            tolerance = float(request.POST.get("correct_decimals"))
             iterations_limit = int(request.POST.get("iterations_limit"))
 
             template_data = NonLinearEquationsMethods.bisection(
