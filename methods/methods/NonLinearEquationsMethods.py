@@ -7,7 +7,7 @@ class NonLinearEquationsMethods:
     @staticmethod
     def bisection(a, b, function, tolerance, iterations_limit):
         if function(a) * function(b) >= 0:
-            raise ValueError("The function must have opposite signs at a and b")
+            raise ValueError("The function must have opposite signs at f(a) and f(b)")
 
         if function(a) == 0:
             table = [[0, a, function(a), 0]]

@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from methods.utils.ResponseManager import ResponseManager
 from methods.utils.EquationsManager import EquationsManager
+from methods.utils.PlotManager import PlotManager
 from methods.methods.NonLinearEquationsMethods import NonLinearEquationsMethods
 from django.urls import reverse
-
 
 def bisection(request):
     template_data = {}
@@ -18,21 +18,23 @@ def bisection(request):
         if request.POST:
             a = float(request.POST.get("a"))
             b = float(request.POST.get("b"))
-            function = EquationsManager.parse_function(request.POST.get("function"))
+            function_str = request.POST.get("function")
+            function = EquationsManager.parse_function(function_str)
             tolerance = float(request.POST.get("correct_decimals"))
             iterations_limit = int(request.POST.get("iterations_limit"))
 
-            template_data["response"] = NonLinearEquationsMethods.bisection(
-                a, b, function, tolerance, iterations_limit
-            )
+            response = NonLinearEquationsMethods.bisection(a, b, function, tolerance, iterations_limit)
+            template_data["response"] = response
+            template_data["plot_data"] = PlotManager.plot_graph(response, function, a, b)
 
             return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
+
         else:
             template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
             return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
 
     except Exception as e:
-        template_data = ResponseManager.error_response(e)
+        template_data = ResponseManager.error_response(str(e))
         return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
 
 
