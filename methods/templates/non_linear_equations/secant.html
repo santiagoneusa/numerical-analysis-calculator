@@ -1,0 +1,46 @@
+<!-- secant.html -->
+
+{% extends 'non_linear_equations/base_methods.html' %}
+
+{% block input_section %}
+<form action="{% url 'methods.secant' %}" method="POST">
+    {% csrf_token %}
+    <div class="row g-3 align-items-center">
+        <div class="col mb-3">
+            <label for="x0" class="form-label">Initial guess x0</label>
+            <input type="text" class="form-control" id="x0" name="x0" required>
+        </div>
+
+        <div class="col mb-3">
+            <label for="x1" class="form-label">Initial guess x1</label>
+            <input type="text" class="form-control" id="x1" name="x1" required>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-center">
+        <div class="mb-3">
+            <label for="function" class="form-label">Function f(x)</label>
+            <input type="text" class="form-control" id="function" name="function" placeholder="Use x as the variable" required>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-center">
+        <div class="mb-3">
+            <label for="correct_decimals" class="form-label">Tolerance</label>
+            <input type="text" class="form-control" id="correct_decimals" name="correct_decimals" placeholder="Example: 0.0001" required>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-center">
+        <div class="mb-3">
+            <label for="iterations_limit" class="form-label">Iterations limit</label>
+            <input type="text" class="form-control" id="iterations_limit" name="iterations_limit" placeholder="Example: 100" required>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Run Secant Method</button>
+    </div>
+</form>
+{% endblock input_section %}
+
