@@ -25,14 +25,14 @@ def bisection(request):
                 a, b, function, tolerance, iterations_limit
             )
 
-            return render(request, "bisection.html", {"template_data": template_data})
+            return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
         else:
             template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
-            return render(request, "bisection.html", {"template_data": template_data})
+            return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
 
     except Exception as e:
         template_data = ResponseManager.error_response(e)
-        return render(request, "bisection.html", {"template_data": template_data})
+        return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
 
 
 def fixed_point(request):
