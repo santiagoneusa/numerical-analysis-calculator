@@ -1,0 +1,43 @@
+{% extends 'non_linear_equations/base_methods.html' %}
+
+{% block input_section %}
+<form action="{% url 'methods.gauss_seidel' %}" method="POST">
+    {% csrf_token %}
+    
+    <!-- Entrada para la matriz A -->
+    <div class="row g-3 align-items-center">
+        <div class="col mb-3">
+            <label for="matrix_A" class="form-label">Matrix A (Coeficients)</label>
+            <textarea class="form-control" id="matrix_A" name="matrix_A" rows="4" placeholder="Enter the matrix rows, separated by commas. For example: [1, 2, 3], [4, 5, 6], [7, 8, 9]" required></textarea>
+        </div>
+    </div>
+    
+    <!-- Entrada para el vector B -->
+    <div class="row g-3 align-items-center">
+        <div class="col mb-3">
+            <label for="vector_B" class="form-label">Vector B (Results)</label>
+            <textarea class="form-control" id="vector_B" name="vector_B" rows="2" placeholder="Enter the vector B, separated by commas. For example: [10, 20, 30]" required></textarea>
+        </div>
+    </div>
+    
+    <!-- Entrada para la tolerancia -->
+    <div class="row g-3 align-items-center">
+        <div class="mb-3">
+            <label for="tolerance" class="form-label">Tolerance</label>
+            <input type="text" class="form-control" id="tolerance" name="tolerance" placeholder="Example: 0.001" required>
+        </div>
+    </div>
+
+    <!-- Entrada para el límite de iteraciones -->
+    <div class="row g-3 align-items-center">
+        <div class="mb-3">
+            <label for="iterations_limit" class="form-label">Iterations limit</label>
+            <input type="text" class="form-control" id="iterations_limit" name="iterations_limit" placeholder="Example: 100" required>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Run Gauss-Seidel method</button>
+    </div>
+</form>
+{% endblock input_section %}
