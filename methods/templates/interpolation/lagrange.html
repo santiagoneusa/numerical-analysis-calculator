@@ -1,0 +1,35 @@
+{% extends 'non_linear_equations/base_methods.html' %}
+
+{% block input_section %}
+<form action="{% url 'methods.lagrange' %}" method="POST">
+    {% csrf_token %}
+    
+    <!-- Entrada para los valores de x -->
+    <div class="row g-3 align-items-center">
+        <div class="col mb-3">
+            <label for="x_values" class="form-label">X Values (Known points)</label>
+            <textarea class="form-control" id="x_values" name="x_values" rows="2" placeholder="Enter the x values separated by commas. For example: 1, 2, 3" required></textarea>
+        </div>
+    </div>
+    
+    <!-- Entrada para los valores de y -->
+    <div class="row g-3 align-items-center">
+        <div class="col mb-3">
+            <label for="y_values" class="form-label">Y Values (Results)</label>
+            <textarea class="form-control" id="y_values" name="y_values" rows="2" placeholder="Enter the y values separated by commas. For example: 2, 4, 6" required></textarea>
+        </div>
+    </div>
+    
+    <!-- Entrada para el valor de x en el que se desea evaluar -->
+    <div class="row g-3 align-items-center">
+        <div class="mb-3">
+            <label for="x" class="form-label">X Value to Interpolate</label>
+            <input type="text" class="form-control" id="x" name="x" placeholder="Enter the x value to interpolate" required>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Run Lagrange Interpolation</button>
+    </div>
+</form>
+{% endblock input_section %}
