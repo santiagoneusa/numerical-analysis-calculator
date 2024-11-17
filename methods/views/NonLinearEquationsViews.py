@@ -6,6 +6,7 @@ from django.urls import reverse
 
 
 def bisection(request):
+    template_data = {}
     template_data["title"] = "Bisection method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),

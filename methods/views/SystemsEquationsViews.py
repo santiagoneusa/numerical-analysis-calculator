@@ -6,6 +6,7 @@ from django.urls import reverse
 
 
 def jacobi(request):
+    template_data = {}
     template_data["title"] = "Jacobi method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
@@ -29,6 +30,7 @@ def jacobi(request):
 
 
 def gauss_seidel(request):
+    template_data = {}
     template_data["title"] = "Gauss-Seidel method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
@@ -52,6 +54,7 @@ def gauss_seidel(request):
 
 
 def sor(request):
+    template_data = {}
     template_data["title"] = "Successive over-relaxation method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),

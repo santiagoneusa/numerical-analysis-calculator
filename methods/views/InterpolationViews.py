@@ -6,6 +6,7 @@ from django.urls import reverse
 
 
 def vandermonde(request):
+    template_data = {}
     template_data["title"] = "Vandermonde method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
@@ -29,6 +30,7 @@ def vandermonde(request):
 
 
 def newton_divided_difference(request):
+    template_data = {}
     template_data["title"] = "Newton divided difference method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
@@ -52,6 +54,7 @@ def newton_divided_difference(request):
 
 
 def lagrange(request):
+    template_data = {}
     template_data["title"] = "Lagrange method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
@@ -75,6 +78,7 @@ def lagrange(request):
 
 
 def spline_linear(request):
+    template_data = {}
     template_data["title"] = "Spline linear method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
