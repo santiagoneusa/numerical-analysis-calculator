@@ -27,10 +27,7 @@ def bisection(request):
 
             return render(request, "bisection.html", {"template_data": template_data})
         else:
-            template_data["response"] = ResponseManager.error_response(
-                "All the inputs must have a value."
-            )
-
+            template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
             return render(request, "bisection.html", {"template_data": template_data})
 
     except Exception as e:
