@@ -1,7 +1,7 @@
 import sympy as sp
 
 
-class MathEquationsManager:
+class EquationsManager:
 
     @staticmethod
     def parse_function(equation_text):
