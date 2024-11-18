@@ -1,13 +1,14 @@
 class ResponseManager:
 
     @staticmethod
-    def success_response(table, message=None):
-        if not message:
+    def success_response(table, message=None, headers=None):
+        if not message and table:
             message = f"The solution was found on x = {table[-1][1]} with a value of f(x) = {table[-1][2]}"
         return {
-            "status": "success",
-            "message": message,
-            "table": table,
+            'status': 'success',
+            'message': message,
+            'table_headers': headers,
+            'table': table,
         }
 
     @staticmethod
