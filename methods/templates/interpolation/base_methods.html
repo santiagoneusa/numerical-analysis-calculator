@@ -17,38 +17,19 @@
 
     <div class="container">
         <div class="row">
-            <div class="col">
+            <div class="col-md-6">
                 <h3>Input</h3>
                 {% block input_section %}
                 {% endblock input_section %}
             </div>
-            <div class="col">
-                <h3>Table</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Iteration</th>
-                            <th>xi</th>
-                            <th>f(xi)</th>
-                            <th>Absolute Error</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in template_data.response.table %}
-                            <tr>
-                                {% for cell in row %}
-                                    <td>{{ cell }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="4">No data available</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="col-md-6">
+                <h3>Results</h3>
+                {% block results_section %}
+                {% endblock results_section %}
             </div>
         </div>
+        {% block extra_content %}
+        {% endblock extra_content %}
     </div>
 
 {% endblock body %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from methods.utils.ResponseManager import ResponseManager
-from methods.utils.EquationsManager import EquationsManager
+from methods.utils.PlotManager import PlotManager
 from methods.methods.InterpolationMethods import InterpolationMethods
 from django.urls import reverse
 
@@ -79,23 +79,41 @@ def lagrange(request):
 
 def spline_linear(request):
     template_data = {}
-    template_data["title"] = "Spline linear method"
-    template_data["breadcrumbs"] = [
-        ("Home", reverse("home")),
-        ("Interpolation", reverse("home") + "#methods-section"),
-        ("Spline linear", reverse("methods.spline_linear")),
-    ]
+    template_data["title"] = "Linear Spline Interpolation"
 
     try:
-        if request.POST:
-            # TODO: Get the inputs
-            # TODO: Implement Spline linear method
-            # TODO: Implement the response
+        if request.method == 'POST':
+            x_values = request.POST.get('x_values')
+            y_values = request.POST.get('y_values')
+
+            # Convert the inputs to lists of numbers
+            x_values = list(map(float, x_values.strip().split()))
+            y_values = list(map(float, y_values.strip().split()))
+
+            # Validate that they have the same length
+            if len(x_values) != len(y_values):
+                raise ValueError("The vectors x and y must have the same length.")
+
+            # Call the linear spline method
+            response = InterpolationMethods.spline_linear(x_values, y_values)
+
+            # Generate the graphic
+            graphic = PlotManager.plot_linear_spline(
+                x=response['plot_data']['x'],
+                y=response['plot_data']['y'],
+                coefficients=response['plot_data']['coefficients']
+            )
+
+            # Add the graphic to the template_data
+            response['graphic'] = graphic
+
+            template_data.update(response)
             return render(request, "interpolation/spline_linear.html", {"template_data": template_data})
+
         else:
-            template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
             return render(request, "interpolation/spline_linear.html", {"template_data": template_data})
 
     except Exception as e:
-        template_data = ResponseManager.error_response(e)
+        template_data = ResponseManager.error_response(str(e))
+        template_data["title"] = "Linear Spline Interpolation"
         return render(request, "interpolation/spline_linear.html", {"template_data": template_data})
