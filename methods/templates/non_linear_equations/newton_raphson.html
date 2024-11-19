@@ -1,0 +1,72 @@
+<!-- newton_raphson.html -->
+
+{% extends 'non_linear_equations/base_methods.html' %}
+
+{% block input_section %}
+<form action="{% url 'methods.newton_raphson' %}" method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="function" class="form-label">Function f(x)</label>
+        <input type="text" class="form-control" id="function" name="function" placeholder="Example: x^2 - 4" required>
+    </div>
+    <div class="mb-3">
+        <label for="x0" class="form-label">Initial guess x0</label>
+        <input type="number" class="form-control" id="x0" name="x0" step="any" required>
+    </div>
+    <div class="mb-3">
+        <label for="tolerance" class="form-label">Tolerance</label>
+        <input type="number" class="form-control" id="tolerance" name="tolerance" step="any" required>
+    </div>
+    <div class="mb-3">
+        <label for="iterations_limit" class="form-label">Maximum iterations</label>
+        <input type="number" class="form-control" id="iterations_limit" name="iterations_limit" required>
+    </div>
+    <div class="mb-3">
+        <label for="error_type" class="form-label">Error type</label>
+        <select class="form-select" id="error_type" name="error_type">
+            <option value="relative">Relative</option>
+            <option value="absolute">Absolute</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Calculate</button>
+</form>
+{% endblock input_section %}
+
+{% block results_section %}
+{% if template_data %}
+    {% if template_data.status == 'success' %}
+        <div class="alert alert-success" role="alert">
+            {{ template_data.message }}
+        </div>
+    {% elif template_data.status == 'warning' %}
+        <div class="alert alert-warning" role="alert">
+            {{ template_data.message }}
+        </div>
+    {% elif template_data.status == 'error' %}
+        <div class="alert alert-danger" role="alert">
+            {{ template_data.message }}
+        </div>
+    {% endif %}
+
+    {% if template_data.table %}
+        <table class="table">
+            <thead>
+                <tr>
+                    {% for header in template_data.table_headers %}
+                        <th>{{ header }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in template_data.table %}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endif %}
+{% endblock results_section %}

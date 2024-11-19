@@ -1,4 +1,5 @@
 import numpy as np
+import sympy as sp
 from methods.utils.ResponseManager import ResponseManager
 
 
@@ -6,6 +7,24 @@ class NonLinearEquationsMethods:
 
     @staticmethod
     def bisection(a, b, function, tolerance, iterations_limit):
+        """
+        Implementation of the bisection method.
+
+        Parameters:
+        a : float
+            Left endpoint of the interval.
+        b : float
+            Right endpoint of the interval.
+        function : function
+            The function to find the root of.
+        tolerance : float
+            Tolerance that determines when to stop the iteration.
+        iterations_limit : int
+            Maximum number of iterations allowed.
+
+        Returns:
+        A response dictionary containing the status, message, table, etc.
+        """
         if function(a) * function(b) >= 0:
             raise ValueError("The function must have opposite signs at f(a) and f(b)")
 
@@ -74,9 +93,9 @@ class NonLinearEquationsMethods:
         if function(a) * function(b) >= 0:
             raise ValueError("The function must have opposite signs at f(a) and f(b)")
 
-        iteration = 0  # Comenzamos desde 0
-        error = None  # Inicializamos el error como None
-        c = a  # Inicializamos c con cualquier valor
+        iteration = 0  # Start from 0
+        error = None  # Initialize the error as None
+        c = a  # Initialize c with any value
         table = []
 
         while iteration < iterations_limit:
@@ -84,18 +103,18 @@ class NonLinearEquationsMethods:
             c = (a * function(b) - b * function(a)) / (function(b) - function(a))
             fc = function(c)
 
-            # En la primera iteración, no podemos calcular el error de forma normal
+            # In the first iteration, we cannot calculate the error normally
             if iteration > 0:
                 error = abs(c - c_old)
             else:
-                error = 100  # Valor arbitrario para la primera iteración
+                error = 100  # Arbitrary value for the first iteration
 
             table.append([iteration + 1, a, b, c, fc, error])
 
             if fc == 0 or error <= tolerance:
                 break
 
-            # Actualizamos los límites
+            # Update the limits
             if function(a) * fc < 0:
                 b = c
             else:
@@ -109,8 +128,84 @@ class NonLinearEquationsMethods:
             return ResponseManager.success_response(table)
 
     @staticmethod
-    def newton_raphson():
-        pass
+    def newton_raphson(function_text, x0, tol, iterations_limit, error_type='relative'):
+        """
+        Implementation of the Newton-Raphson method.
+
+        Parameters:
+        function_text : str
+            The function f(x) entered by the user as a string of text.
+        x0 : float
+            Initial approximation of the root.
+        tol : float
+            Tolerance that determines when to stop the iteration.
+        iterations_limit : int
+            Maximum number of iterations allowed.
+        error_type : str
+            Type of error to calculate ('relative' or 'absolute').
+
+        Returns:
+        A response dictionary containing the status, message, table, etc.
+        """
+
+        x = sp.symbols('x')
+
+        # Parsear la función y calcular su derivada
+        try:
+            f_sym = sp.sympify(function_text.replace('^', '**'))
+        except (sp.SympifyError, TypeError) as e:
+            return ResponseManager.error_response(f"Error interpreting the function: {e}")
+
+        f_num = sp.lambdify(x, f_sym, 'numpy')
+
+        df_sym = sp.diff(f_sym, x)
+        df_num = sp.lambdify(x, df_sym, 'numpy')
+
+        # Initialize variables
+        x_i = x0
+        error = float('inf')
+        iterations = 0
+        prev_x_i = None
+        table = []
+
+        # Start of iterations
+        while error > tol and iterations < iterations_limit:
+            try:
+                f_x_i = f_num(x_i)
+                df_x_i = df_num(x_i)
+            except Exception as e:
+                return ResponseManager.error_response(f"Error evaluating the function or its derivative: {e}")
+
+            if df_x_i == 0:
+                return ResponseManager.error_response(f"The derivative is zero at x = {x_i}. Cannot continue.")
+
+            new_x_i = x_i - f_x_i / df_x_i
+
+            # Calculate the error
+            if iterations > 0:
+                if error_type == 'relative' and new_x_i != 0:
+                    error = abs((new_x_i - prev_x_i) / new_x_i)
+                else:
+                    error = abs(new_x_i - prev_x_i)
+            else:
+                error = float('inf')
+
+            # Agregar datos a la tabla
+            table.append([iterations, x_i, f_x_i, df_x_i, error])
+
+            # Preparar para la siguiente iteración
+            prev_x_i = x_i
+            x_i = new_x_i
+            iterations += 1
+
+        # Prepare the response
+        headers = ['Iteration', 'x(i)', 'f(x(i))', 'f\'(x(i))', 'Error']
+        if abs(f_x_i) <= tol or error <= tol:
+            message = f"Una raíz aproximada es x = {x_i} con f(x) = {f_x_i}"
+            return ResponseManager.success_response(table, message, headers)
+        else:
+            message = f"The method did not converge after {iterations_limit} iterations."
+            return ResponseManager.warning_response(table, message)
 
     @staticmethod
     def secant(x0, x1, function, tolerance, iterations_limit):

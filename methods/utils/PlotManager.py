@@ -6,12 +6,9 @@ import base64
 
 class PlotManager:
     @staticmethod
-    def plot_graph(response_data, function):
+    def plot_graph(response_data, function, a: float = None, b: float = None):
         aproximate_x = response_data["table"][-1][1]
         aproximate_y = response_data["table"][-1][2]
-
-        a = aproximate_y - 10
-        b = aproximate_y + 10
 
         x_values = np.linspace(a, b, 1000).tolist()
         y_values = [function(x) for x in x_values]
