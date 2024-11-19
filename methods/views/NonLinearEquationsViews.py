@@ -25,7 +25,7 @@ def bisection(request):
 
             response = NonLinearEquationsMethods.bisection(a, b, function, tolerance, iterations_limit)
             template_data["response"] = response
-            template_data["plot_data"] = PlotManager.plot_graph(response, function, a, b)
+            template_data["plot_data"] = PlotManager.plot_graph(response, function)
 
             return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
 
@@ -51,7 +51,36 @@ def newton_raphson(request):
 
 
 def secant(request):
-    pass
+    template_data = {}
+    template_data["title"] = "Secant Method"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Non Linear Equations", reverse("home") + "#methods-section"),
+        ("Secant", reverse("methods.secant")),
+    ]
+
+    try:
+        if request.POST:
+            x0 = float(request.POST.get("x0"))
+            x1 = float(request.POST.get("x1"))
+            function_str = request.POST.get("function")
+            function = EquationsManager.parse_function(function_str)
+            tolerance = float(request.POST.get("correct_decimals"))
+            iterations_limit = int(request.POST.get("iterations_limit"))
+
+            response = NonLinearEquationsMethods.secant(x0, x1, function, tolerance, iterations_limit)
+            template_data["response"] = response
+            template_data["plot_data"] = PlotManager.plot_graph(response, function)
+
+            return render(request, "non_linear_equations/secant.html", {"template_data": template_data})
+
+        else:
+            template_data["response"] = ResponseManager.error_response("All inputs must have a value.")
+            return render(request, "non_linear_equations/secant.html", {"template_data": template_data})
+
+    except Exception as e:
+        template_data["response"] = ResponseManager.error_response(str(e))
+        return render(request, "non_linear_equations/secant.html", {"template_data": template_data})
 
 
 def multiple_roots_v1(request):

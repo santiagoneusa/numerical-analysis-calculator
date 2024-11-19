@@ -1,3 +1,6 @@
+import numpy as np
+from methods.utils.ResponseManager import ResponseManager
+
 class InterpolationMethods:
 
     @staticmethod
@@ -35,14 +38,58 @@ class InterpolationMethods:
         
         return result
 
-    @staticmethod
-    def spline_linear():
-        pass
 
     @staticmethod
-    def spline_square():
-        pass
+    def spline_linear(x_values, y_values):
+        """
+        Interpolation method for linear splines.
 
-    @staticmethod
-    def spline_cubic():
-        pass
+        Parameters:
+        x_values : list[float] - List of x values (known points).
+        y_values : list[float] - List of y values (known results).
+
+        Returns:
+        dict - Dictionary with the table, message, headers and plot data.
+        """
+        n = len(x_values)
+        if n != len(y_values):
+            raise ValueError("The vectors x and y must have the same length.")
+
+        # Sort the points by x to avoid problems
+        sorted_indices = np.argsort(x_values)
+        x = np.array(x_values)[sorted_indices]
+        y = np.array(y_values)[sorted_indices]
+
+        coefficients = []
+
+        for i in range(n - 1):
+            a_i = (y[i + 1] - y[i]) / (x[i + 1] - x[i])  # Slope
+            b_i = y[i] - a_i * x[i]                       # Intersection
+            coefficients.append([a_i, b_i])
+
+        table = []
+        for i in range(len(coefficients)):
+            interval = f"[{x[i]}, {x[i+1]}]"
+            a_i, b_i = coefficients[i]
+            equation = f"y = {a_i} * x + {b_i}"
+            table.append([interval, a_i, b_i, equation])
+
+        # Prepare the data for plotting
+        plot_data = {
+            'x': x.tolist(),
+            'y': y.tolist(),
+            'coefficients': coefficients
+        }
+
+        headers = ['Interval', 'Slope (a_i)', 'Intersection (b_i)', 'Equation']
+
+        response = ResponseManager.success_response(
+            table=table,
+            message="Calculation completed successfully.",
+            headers=headers
+        )
+
+        # Add plot_data to the response dictionary
+        response['plot_data'] = plot_data
+
+        return response
