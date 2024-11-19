@@ -93,11 +93,3 @@ class InterpolationMethods:
         response['plot_data'] = plot_data
 
         return response
-
-    @staticmethod
-    def spline_square():
-        pass
-
-    @staticmethod
-    def spline_cubic():
-        pass
