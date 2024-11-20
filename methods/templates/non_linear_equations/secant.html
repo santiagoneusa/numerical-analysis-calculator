@@ -1,5 +1,3 @@
-<!-- secant.html -->
-
 {% extends 'non_linear_equations/base_methods.html' %}
 
 {% block input_section %}
@@ -17,30 +15,54 @@
         </div>
     </div>
 
-    <div class="row g-3 align-items-center">
-        <div class="mb-3">
-            <label for="function" class="form-label">Function f(x)</label>
-            <input type="text" class="form-control" id="function" name="function" placeholder="Use x as the variable" required>
-        </div>
+    <div class="mb-3">
+        <label for="function" class="form-label">Function f(x)</label>
+        <input type="text" class="form-control" id="function" name="function" placeholder="Use x as the variable" required>
     </div>
 
-    <div class="row g-3 align-items-center">
-        <div class="mb-3">
-            <label for="correct_decimals" class="form-label">Tolerance</label>
-            <input type="text" class="form-control" id="correct_decimals" name="correct_decimals" placeholder="Example: 0.0001" required>
-        </div>
+    <!-- Error Type Selector -->
+    <div class="mb-3">
+        <label for="error_type" class="form-label">Error Type</label>
+        <select class="form-select" id="error_type" name="error_type" required>
+            <option value="relative" selected>Relative Error (Significant Figures)</option>
+            <option value="absolute">Absolute Error (Correct Decimals)</option>
+        </select>
     </div>
 
-    <div class="row g-3 align-items-center">
-        <div class="mb-3">
-            <label for="iterations_limit" class="form-label">Iterations limit</label>
-            <input type="text" class="form-control" id="iterations_limit" name="iterations_limit" placeholder="Example: 100" required>
-        </div>
+    <!-- Tolerance Input -->
+    <div class="mb-3">
+        <label for="tolerance" class="form-label" id="tolerance_label">Number of Significant Figures (k)</label>
+        <input type="text" class="form-control" id="tolerance" name="tolerance" placeholder="Example: 5" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="iterations_limit" class="form-label">Iterations limit</label>
+        <input type="text" class="form-control" id="iterations_limit" name="iterations_limit" placeholder="Example: 100" required>
     </div>
 
     <div class="text-center">
         <button type="submit" class="btn btn-primary">Run Secant Method</button>
     </div>
 </form>
-{% endblock input_section %}
 
+<!-- JavaScript to adjust the tolerance label -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const errorTypeSelect = document.getElementById('error_type');
+        const toleranceLabel = document.getElementById('tolerance_label');
+
+        function updateToleranceLabel() {
+            if (errorTypeSelect.value === 'relative') {
+                toleranceLabel.textContent = 'Number of Significant Figures (k)';
+                document.getElementById('tolerance').placeholder = 'Example: 5';
+            } else {
+                toleranceLabel.textContent = 'Number of Correct Decimals (d)';
+                document.getElementById('tolerance').placeholder = 'Example: 5';
+            }
+        }
+
+        errorTypeSelect.addEventListener('change', updateToleranceLabel);
+        updateToleranceLabel(); // Initialize on page load
+    });
+</script>
+{% endblock input_section %}
