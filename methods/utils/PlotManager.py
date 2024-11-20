@@ -24,42 +24,86 @@ class PlotManager:
         }
 
 
-    def plot_newton_divided_difference(x_values, y_values, polynomial_function):
-        import matplotlib
-        matplotlib.use('Agg')  # Usar el backend sin interfaz gráfica
-        import matplotlib.pyplot as plt
-        import numpy as np
-        from io import BytesIO
+    @staticmethod
+    def plot_newton_divided_difference(x, y):
+        """
+        Generate a plot for the Newton Divided Difference interpolation.
 
-        # Generar la figura
-        fig, ax = plt.subplots(figsize=(8, 6))
-        ax.plot(x_values, y_values, 'o', label='Data points')
+        Parameters:
+        x : list[float] - List of x values (known points).
+        y : list[float] - List of y values (known results).
 
-        # Generar el rango de x para el polinomio
-        x_range = np.linspace(min(x_values) - 1, max(x_values) + 1, 500)
-        y_range = [polynomial_function(x) for x in x_range]
+        Returns:
+        str - Base64 encoded image string.
+        """
+        # Validaciones básicas
+        if len(x) != len(y):
+            raise ValueError("The x and y lists must have the same length.")
+        
+        # Crear una figura para graficar
+        fig, ax = plt.subplots()
 
-        ax.plot(x_range, y_range, '-', label='Interpolation Polynomial')
+        # Graficar los puntos conocidos
+        ax.plot(x, y, 'o', label='Given points', color='red')
+
+        # Función para calcular el polinomio de Newton
+        def newton_polynomial(x_vals, x_points, y_points):
+            """
+            Calculate the Newton polynomial for a given x value and known data points.
+            """
+            n = len(x_points)
+            # Calcular la tabla de diferencias divididas
+            divided_diff_table = np.zeros((n, n))
+            divided_diff_table[:, 0] = y_points
+            for j in range(1, n):
+                for i in range(j, n):
+                    divided_diff_table[i, j] = (
+                        divided_diff_table[i, j - 1] - divided_diff_table[i - 1, j - 1]
+                    ) / (x_points[i] - x_points[i - j])
+            
+            # Extraer coeficientes del polinomio
+            coefficients = [divided_diff_table[i, i] for i in range(n)]
+            
+            # Evaluar el polinomio en los puntos dados
+            result = []
+            for val in x_vals:
+                res = coefficients[0]
+                product = 1
+                for i in range(1, n):
+                    product *= (val - x_points[i - 1])
+                    res += coefficients[i] * product
+                result.append(res)
+            return result
+
+        # Generar un rango denso de valores x para la curva suave
+        x_dense = np.linspace(min(x), max(x), 1000)
+
+        # Calcular los valores y correspondientes para el polinomio de Newton
+        y_dense = newton_polynomial(x_dense, x, y)
+
+        # Graficar la curva de interpolación de Newton
+        ax.plot(x_dense, y_dense, label='Newton Interpolation', color='blue')
+
+        # Añadir etiquetas y título
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_title('Newton Divided Difference Interpolation')
+
+        # Añadir leyenda
         ax.legend()
-        ax.grid()
 
-        # Guardar como SVG
-        svg_output = BytesIO()
-        plt.savefig(svg_output, format='svg', bbox_inches='tight')
+        # Guardar la figura en un buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image_png = buf.getvalue()
+        buf.close()
         plt.close(fig)
 
-        # Leer el contenido SVG generado
-        svg_output.seek(0)
-        svg_data = svg_output.getvalue().decode('utf-8')
+        # Codificar la imagen a base64 para insertar en HTML
+        graphic = base64.b64encode(image_png).decode('utf-8')
 
-        # Imprimir el contenido SVG para depuración
-        print("SVG Data:", svg_data[:500])  # Imprime los primeros 500 caracteres del SVG
-
-        # Si el archivo es vacío, entonces probablemente ocurrió un error al generar el gráfico.
-        if not svg_data.startswith('<svg'):
-            print("Error: SVG no comienza correctamente.")
-
-        return svg_data
+        return graphic
 
 
     @staticmethod

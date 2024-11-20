@@ -1,17 +1,10 @@
 import numpy as np
 from methods.utils.ResponseManager import ResponseManager
 
-
-
-
-
-    
-
 class InterpolationMethods:
     
     @staticmethod
     def vandermonde(x_values, y_values):
-        
         n = len(x_values)
         if n != len(y_values):
             raise ValueError("The vectors x and y must have the same length.")
@@ -65,63 +58,92 @@ class InterpolationMethods:
     
 
     @staticmethod
-    def newton_divided_difference(x_values, y_values):
+    def newton_divided_difference(x_values, y_values, x_to_interpolate):
+        """
+        Interpolation method for Newton Divided Difference.
+
+        Parameters:
+        x_values : list[float] - List of x values (known points).
+        y_values : list[float] - List of y values (known results).
+        x_to_interpolate : float - The x value at which to interpolate the polynomial.
+
+        Returns:
+        dict - Dictionary with the table, message, headers, plot data, and interpolated value.
+        """
         n = len(x_values)
-        
+
         # Validaciones
         if n != len(y_values):
             raise ValueError("The vectors x and y must have the same length.")
-        
         if n < 2:
             raise ValueError("At least two data points are required for Newton interpolation.")
-        
-        if x_values != sorted(x_values):
-            raise ValueError("The x values must be in ascending order.")
-        
         if len(set(x_values)) != len(x_values):
             raise ValueError("The x values must be distinct (no duplicates).")
-
-        # Sort the points by x to avoid problems
+        
+        # Ordenar los puntos por x
         sorted_indices = np.argsort(x_values)
         x = np.array(x_values)[sorted_indices]
         y = np.array(y_values)[sorted_indices]
 
-        # Calculate the table of divided differences
+        # Construir la tabla de diferencias divididas
         divided_diff_table = np.zeros((n, n))
         divided_diff_table[:, 0] = y
-
         for j in range(1, n):
             for i in range(j, n):
                 divided_diff_table[i, j] = (
-                    divided_diff_table[i, j-1] - divided_diff_table[i-1, j-1]
-                ) / (x[i] - x[i-j])
+                    divided_diff_table[i, j - 1] - divided_diff_table[i - 1, j - 1]
+                ) / (x[i] - x[i - j])
 
-        # Extract the coefficients (first entry of each column)
+        # Coeficientes del polinomio (primera fila de cada columna)
         coefficients = [divided_diff_table[i, i] for i in range(n)]
 
-        # Define the polynomial function
+        # Construir la función polinómica
         def polynomial_function(value):
             result = coefficients[0]
             product = 1
             for i in range(1, n):
-                product *= (value - x[i-1])
+                product *= (value - x[i - 1])
                 result += coefficients[i] * product
             return result
 
-        # Prepare the data for the response
+        # Evaluar el polinomio en el punto dado
+        interpolated_value = polynomial_function(x_to_interpolate)
+
+        # Representación textual del polinomio
+        polynomial_str = f"{coefficients[0]:.4f}"
+        for i in range(1, n):
+            term = f"{coefficients[i]:+.4f}"
+            for j in range(i):
+                term += f"(x - {x[j]:.4f})"
+            polynomial_str += " " + term
+
+        # Preparar la tabla
+        table = []
+        for i in range(n):
+            table.append([
+                f"Coefficient for term {i + 1}",
+                coefficients[i]
+            ])
+        table.append(["Interpolated Value", interpolated_value])
+        table.append(["Polynomial Expression", polynomial_str])
+
+        headers = ['Description', 'Value']
+
+        # Datos para graficar
         plot_data = {
             'x': x.tolist(),
-            'y': y.tolist(),
-            'coefficients': coefficients,
-            'polynomial_function': polynomial_function
+            'y': y.tolist()
         }
 
-        # Return the results
+        # Estructura de la respuesta
         response = {
-            'polynomial': polynomial_function,
-            'coefficients': coefficients,
-            'message': "Polynomial calculation completed successfully.",
-            'plot_data': plot_data
+            'table': table,
+            'status': 'success',
+            'message': f"Newton interpolation completed successfully. Interpolated value at x = {x_to_interpolate} is {interpolated_value}.",
+            'headers': headers,
+            'plot_data': plot_data,
+            'interpolated_value': interpolated_value,
+            'polynomial_expression': polynomial_str
         }
 
         return response
