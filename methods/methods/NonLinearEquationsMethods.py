@@ -249,9 +249,87 @@ class NonLinearEquationsMethods:
             return ResponseManager.success_response(table)
 
     @staticmethod
-    def multiple_roots_v1():
-        pass
+    def multiple_roots_v1(x0, tol, iterations_limit, multi, function ):
+        
+        """
+        Using multiplicity
+        """
+        
+        x_symbol = sp.symbols('x')
+
+        # Parsear la función y calcular su derivada
+        try:
+            f_sym = sp.sympify(function.replace('^', '**'))
+        except (sp.SympifyError, TypeError) as e:
+            return ResponseManager.error_response(f"Error interpreting the function: {e}")
+        
+        f_num = sp.lambdify(x_symbol, f_sym, 'numpy')
+
+        df_sym = sp.diff(f_sym, x_symbol)
+        df_num = sp.lambdify(x_symbol, df_sym, 'numpy')
+        
+        # Initialize lists and variables
+        xn = []
+        x = x0
+        f = f_num(x)
+        derivada = df_num(x)
+        iteration = 0
+        Error = float('inf')  # Initial error set to a high value
+        xn.append(x)
+        table = []
+        
+        while Error > tol and f != 0 and derivada != 0 and iteration < iterations_limit:
+            x = x - multi*(f / derivada)
+            derivada = df_num(x)
+            f = f_num(x)
+            xn.append(x)
+            iteration += 1
+            Error = abs(xn[iteration] - xn[iteration - 1])
+            table.append([iteration, x, f, Error])
+                 
+        if iteration == iterations_limit:
+            return ResponseManager.warning_response(table)
+        else:
+            return ResponseManager.success_response(table)
+            
+            
+        
 
     @staticmethod
-    def multiple_roots_v2():
-        pass
+    def multiple_roots_v2(x0, tol, iterations_limit, function):
+        
+        x_symbol = sp.symbols('x')
+
+        # Parsear la función y calcular su derivada
+        try:
+            f_sym = sp.sympify(function.replace('^', '**'))
+        except (sp.SympifyError, TypeError) as e:
+            return ResponseManager.error_response(f"Error interpreting the function: {e}")
+        
+        f_num = sp.lambdify(x_symbol, f_sym, 'numpy')
+
+        df_sym = sp.diff(f_sym, x_symbol)
+        df_num = sp.lambdify(x_symbol, df_sym, 'numpy')
+        
+        df2_sym = sp.diff(f_sym, x_symbol, 2)
+        df2_num = sp.lambdify(x_symbol, df2_sym, 'numpy')
+        
+        # Initialize lists and variables
+        xn = []
+        x = x0
+        f = f_num(x)
+        derivada = df_num(x)
+        segunda_derivada = df2_num(x)
+        iteration = 0
+        Error = float('inf')  # Initial error set to a high value
+        xn.append(x)
+        table = []
+        
+        while Error > tol and f != 0  and iteration < iterations_limit:
+            x = x - ( f * derivada / derivada**2 - (f*segunda_derivada))
+            derivada = df_num(x)
+            segunda_derivada = df2_num(x)
+            f = f_num(x)
+            xn.append(x)
+            iteration += 1
+            Error = abs(xn[iteration] - xn[iteration - 1])
