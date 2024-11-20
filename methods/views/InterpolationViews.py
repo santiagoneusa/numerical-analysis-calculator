@@ -7,7 +7,7 @@ from django.urls import reverse
 
 def vandermonde(request):
     template_data = {}
-    template_data["title"] = "Vandermonde method"
+    template_data["title"] = "Vandermonde Method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
         ("Interpolation", reverse("home") + "#methods-section"),
@@ -15,17 +15,49 @@ def vandermonde(request):
     ]
 
     try:
-        if request.POST:
-            # TODO: Get the inputs
-            # TODO: Implement Vandermonde method
-            # TODO: Implement the response
+        if request.method == 'POST':
+            x_values = request.POST.get('x_values')
+            y_values = request.POST.get('y_values')
+
+            # Convert the inputs to lists of numbers
+            x_values = list(map(float, x_values.strip().split()))
+            y_values = list(map(float, y_values.strip().split()))
+
+            # Validate that they have the same length
+            if len(x_values) != len(y_values):
+                raise ValueError("The vectors x and y must have the same length.")
+
+            # Call the Vandermonde method to compute the matrix and polynomial
+            response = InterpolationMethods.vandermonde(x_values, y_values)
+
+            # Debugging lines (to check the output in the terminal)
+            print("First row of Vandermonde Matrix:", response['matrix'][1])
+            print("First coefficient of Polynomial:", response['coefficients'][1])
+            
+            # Add matrix, polynomial, and coefficients to the template context
+            template_data["matrix"] = response['matrix']
+            template_data["polynomial"] = response['polynomial']
+            template_data["coefficients"] = response['coefficients']
+
+            # Prepare table data for displaying coefficients, if needed
+            table = []
+            for i, coeff in enumerate(response['coefficients']):
+                table.append([f"x^{i}", f"{coeff:.4f}"])
+
+            # Add table data and headers for rendering in the template
+            template_data["table"] = table
+            template_data["headers"] = ['Term', 'Coefficient']
+
+            print("Template data:", template_data)  # Debugging line
+
             return render(request, "interpolation/vandermonde.html", {"template_data": template_data})
+
         else:
             template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
             return render(request, "interpolation/vandermonde.html", {"template_data": template_data})
 
     except Exception as e:
-        template_data = ResponseManager.error_response(e)
+        template_data = ResponseManager.error_response(str(e))
         return render(request, "interpolation/vandermonde.html", {"template_data": template_data})
 
 
@@ -55,25 +87,50 @@ def newton_divided_difference(request):
 
 def lagrange(request):
     template_data = {}
-    template_data["title"] = "Lagrange method"
-    template_data["breadcrumbs"] = [
-        ("Home", reverse("home")),
-        ("Interpolation", reverse("home") + "#methods-section"),
-        ("Lagrange", reverse("methods.lagrange")),
-    ]
+    template_data["title"] = "Lagrange Interpolation"
 
     try:
-        if request.POST:
-            # TODO: Get the inputs
-            # TODO: Implement Lagrange method
-            # TODO: Implement the response
+        if request.method == 'POST':
+            # Obtener los valores de entrada del formulario
+            x_values = request.POST.get('x_values')
+            y_values = request.POST.get('y_values')
+            x_to_interpolate = float(request.POST.get('x'))
+
+            # Convertir las entradas a listas de números
+            x_values = list(map(float, x_values.strip().split()))
+            y_values = list(map(float, y_values.strip().split()))
+
+            # Validar que los vectores x y y tengan la misma longitud
+            if len(x_values) != len(y_values):
+                raise ValueError("Los vectores x e y deben tener la misma longitud.")
+
+            # Llamar al método de interpolación de Lagrange
+            response = InterpolationMethods.lagrange(x_values, y_values, x_to_interpolate)
+
+            # Generar el gráfico (si es necesario)
+            graphic = PlotManager.plot_lagrange(
+                x=response['plot_data']['x'],
+                y=response['plot_data']['y']
+            )
+
+            # Agregar el gráfico a los datos de la plantilla
+            response['graphic'] = graphic
+
+            # Añadir la respuesta de la interpolación y el gráfico a los datos de la plantilla
+            template_data.update(response)
+        
+
+            # Renderizar la plantilla con los datos generados
             return render(request, "interpolation/lagrange.html", {"template_data": template_data})
+
         else:
-            template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
+            # Si es un GET, solo renderizamos la plantilla vacía
             return render(request, "interpolation/lagrange.html", {"template_data": template_data})
 
     except Exception as e:
-        template_data = ResponseManager.error_response(e)
+        # Si hay un error, capturarlo y renderizarlo en la plantilla
+        template_data = ResponseManager.error_response(str(e))
+        template_data["title"] = "Lagrange Interpolation"
         return render(request, "interpolation/lagrange.html", {"template_data": template_data})
 
 

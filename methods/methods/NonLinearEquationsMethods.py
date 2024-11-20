@@ -62,71 +62,121 @@ class NonLinearEquationsMethods:
 
     @staticmethod
     def fixed_point(g_function, initial_guess, tolerance, iterations_limit):
-        iteration = 0  # Comenzamos desde 0
+        """
+        Implementation of the Fixed Point Iteration method.
+
+        Parameters:
+        g_function : function
+            The function g(x) used to approximate the root.
+        initial_guess : float
+            Initial approximation of the root.
+        tolerance : float
+            The tolerance for the stopping condition.
+        iterations_limit : int
+            The maximum number of iterations allowed.
+
+        Returns:
+        A response dictionary containing the status, message, table, etc.
+        """
+
+        # Inicialización de variables
+        iteration = 0
         x0 = initial_guess
-        error = None  # Inicializamos el error como None
-        table = [[0, x0, g_function(x0), error]]  # Agregamos la primera fila
+        error = float('inf')  # Inicializamos el error con un valor grande
+        table = []  # Tabla de resultados
+        # Primer valor de la iteración
+        table.append([iteration, x0, g_function(x0), error])
 
+        # Comienza la iteración
         while iteration < iterations_limit:
-            x1 = g_function(x0)
-            
-            # En la primera iteración, no podemos calcular el error normalmente
-            if iteration > 0:
-                error = abs(x1 - x0)
-            else:
-                error = 100  # Establecemos un valor arbitrario para la primera iteración
+            try:
+                x1 = g_function(x0)
+            except Exception as e:
+                return ResponseManager.error_response(f"Error evaluating the function: {e}")
 
+            # Calcular el error
+            if iteration > 0:
+                error = abs(x1 - x0)  # Error absoluto
+            else:
+                error = float('inf')  # Para la primera iteración, usamos un error arbitrario
+
+            # Agregar los datos a la tabla
             table.append([iteration + 1, x1, g_function(x1), error])
 
+            # Verificar si el error es menor que la tolerancia
             if error <= tolerance:
-                break
+                message = f"Converged to a root at x = {x1} with g(x) = {g_function(x1)}"
+                return ResponseManager.success_response(table, message)
 
-            x0 = x1  # Actualizamos el valor de x0
-            iteration += 1  # Incrementamos la iteración
+            # Preparar para la siguiente iteración
+            x0 = x1
+            iteration += 1
 
-        if iteration == iterations_limit:
-            return ResponseManager.warning_response(table)
-        else:
-            return ResponseManager.success_response(table)
+        # Si no convergió después de los intentos máximos
+        message = f"Method did not converge after {iterations_limit} iterations."
+        return ResponseManager.warning_response(table, message)
 
     @staticmethod
     def false_position(a, b, function, tolerance, iterations_limit):
-        if function(a) * function(b) >= 0:
-            raise ValueError("The function must have opposite signs at f(a) and f(b)")
+        """
+        Implementation of the False Position (Regula Falsi) method.
 
+        Parameters:
+        a : float
+            Left boundary of the interval.
+        b : float
+            Right boundary of the interval.
+        function : function
+            The function for which we are finding the root.
+        tolerance : float
+            The tolerance for the stopping condition.
+        iterations_limit : int
+            The maximum number of iterations allowed.
+
+        Returns:
+        A response dictionary containing the status, message, table, etc.
+        """
+        
+        if function(a) * function(b) >= 0:
+            return ResponseManager.error_response("The function must have opposite signs at f(a) and f(b)")
         iteration = 0  # Start from 0
-        error = None  # Initialize the error as None
+        error = float('inf')  # Initialize the error as infinity for the first iteration
         c = a  # Initialize c with any value
         table = []
+       
+        # First iteration value
+        table.append([iteration, a, b, c, function(c), error])
 
         while iteration < iterations_limit:
             c_old = c
             c = (a * function(b) - b * function(a)) / (function(b) - function(a))
             fc = function(c)
 
-            # In the first iteration, we cannot calculate the error normally
+            # Calculate the error
             if iteration > 0:
                 error = abs(c - c_old)
             else:
-                error = 100  # Arbitrary value for the first iteration
+                error = float('inf')  # Arbitrary value for the first iteration
 
+            # Add to the table
             table.append([iteration + 1, a, b, c, fc, error])
 
+            # Check for convergence or tolerance
             if fc == 0 or error <= tolerance:
-                break
+                message = f"Converged to a root at x = {c} with f(x) = {fc}"
+                return ResponseManager.success_response(table, message)
 
-            # Update the limits
+            # Update the interval limits
             if function(a) * fc < 0:
                 b = c
             else:
                 a = c
 
-            iteration += 1  # Incrementamos la iteración
+            iteration += 1  # Increment iteration
 
-        if iteration == iterations_limit:
-            return ResponseManager.warning_response(table)
-        else:
-            return ResponseManager.success_response(table)
+        # If the method did not converge within the iteration limit
+        message = f"Method did not converge after {iterations_limit} iterations."
+        return ResponseManager.warning_response(table, message)
 
     @staticmethod
     def newton_raphson(function_text, x0, tol, iterations_limit, error_type='relative'):
@@ -336,51 +386,11 @@ class NonLinearEquationsMethods:
             iteration += 1
             Error = abs(xn[iteration] - xn[iteration - 1])
             table.append([iteration, x, f, Error]) 
-       
         
-        """ x_symbol = sp.symbols('x')
 
-        # Parse the function and calculate its derivatives
-        try:
-            f_sym = sp.sympify(function.replace('^', '**'))
-        except (sp.SympifyError, TypeError) as e:
-            return ResponseManager.error_response(f"Error interpreting the function: {e}")
-
-        try:
-            f_num = sp.lambdify(x_symbol, f_sym, 'numpy')
-            df_sym = sp.diff(f_sym, x_symbol)
-            df_num = sp.lambdify(x_symbol, df_sym, 'numpy')
-            df2_sym = sp.diff(f_sym, x_symbol, 2)
-            df2_num = sp.lambdify(x_symbol, df2_sym, 'numpy')
-        except Exception as e:
-            return ResponseManager.error_response(f"Error lambdifying the function or its derivatives: {e}")
-
-        # Initialize variables
-        xn = [x0]
-        x = x0
-        iteration = 0
-        Error = float('inf')  # Start with a high error
-        table = []
-
-        while Error > tol and iteration < iterations_limit:
-            try:
-                f = f_num(x)
-                derivada = df_num(x)
-                segunda_derivada = df2_num(x)
-
-                if f is None or derivada is None or segunda_derivada is None:
-                    return ResponseManager.error_response(f"Error: Function or derivatives returned None at x = {x}.")
-
-                denominator = derivada**2 - f * segunda_derivada
-                if abs(denominator) < 1e-10:  # Avoid division by zero
-                    return ResponseManager.error_response(f"Failed to converge: denominator too small at iteration {iteration}.")
-
-                # Update x using the corrected formula
-                x_new = x - (f * derivada) / denominator
-                Error = abs(x_new - x)
-                x = x_new
-                xn.append(x)
-                iteration += 1
-                table.append([iteration, x, f, Error])
-            except Exception as e:
-                return ResponseManager.error_response(f"Error during iteration {iteration}: {e}") """
+       
+        if iteration == iterations_limit:
+            return ResponseManager.warning_response(table)
+        else:
+            return ResponseManager.success_response(table)
+        

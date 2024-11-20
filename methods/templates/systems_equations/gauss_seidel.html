@@ -1,4 +1,4 @@
-{% extends 'non_linear_equations/base_methods.html' %}
+{% extends 'systems_equations/base_methods.html' %}
 
 {% block input_section %}
 <form action="{% url 'methods.gauss_seidel' %}" method="POST">
@@ -17,6 +17,12 @@
     </div>
 
     <div class="mb-3">
+        <label for="x0" class="form-label">Vector x0</label>
+        <input type="text" class="form-control" id="x0" name="x0" required>
+        <small class="form-text text-muted">Example: "15 10 10"</small>
+    </div>
+
+    <div class="mb-3">
         <label for="tolerance" class="form-label">Tolerance</label>
         <input type="number" class="form-control" id="tolerance" name="tolerance" step="any" required>
     </div>
@@ -31,3 +37,26 @@
     </div>
 </form>
 {% endblock input_section %}
+
+{% block results_section %}
+{% if template_data.table %}
+    <table class="table">
+        <thead>
+            <tr>
+                {% for header in template_data.table_headers %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in template_data.table %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock results_section %}

@@ -1,43 +1,143 @@
 import numpy as np
 from methods.utils.ResponseManager import ResponseManager
 
+
+
+
+
+    
+
 class InterpolationMethods:
-
+    
     @staticmethod
-    def vandermonde():
-        pass
+    def vandermonde(x_values, y_values):
+        
+        n = len(x_values)
+        if n != len(y_values):
+            raise ValueError("The vectors x and y must have the same length.")
 
+        # Sort the points by x to avoid problems
+        sorted_indices = np.argsort(x_values)
+        x = np.array(x_values)[sorted_indices]
+        y = np.array(y_values)[sorted_indices]
+        
+        # Construct the Vandermonde matrix A
+        A = np.vander(x, increasing=True)
+        b = np.array(y)
+        
+        # Solve for the coefficients using the Vandermonde matrix
+        coefficients = np.linalg.solve(A, b)
+        
+        # Create the polynomial equation string
+        polynomial = " + ".join([f"{coeff:.4f}*x^{i}" for i, coeff in enumerate(coefficients)])
+        
+        # Prepare a table with the results for easier presentation
+        table = []
+        for i, coeff in enumerate(coefficients):
+            table.append([f"x^{i}", f"{coeff:.4f}"])
+
+        # Prepare the data for plotting (even though it's not used for plotting here)
+        """ plot_data = {
+            'x': x.tolist(),
+            'y': y.tolist(),
+            'coefficients': coefficients.tolist()
+        } """
+
+        # Define the headers for the table
+        headers = ['Term', 'Coefficient']
+
+        # Prepare the final response with success response
+        response = ResponseManager.success_response(
+            table=table,
+            message="Vandermonde method calculation completed successfully.",
+            headers=headers
+        )
+        
+        response['matrix'] = A.tolist()  # Vandermonde matrix as a list
+        response['polynomial'] = polynomial  # Polynomial equation
+        response['coefficients'] = coefficients.tolist()  # Coefficients as a list
+    
+
+        # Add plot_data to the response dictionary (you can use this for later plotting if needed)
+        #response['plot_data'] = plot_data
+
+        return response
+    
     @staticmethod
     def newton_divided_difference():
         pass
-
+    
+    
     @staticmethod
-    def lagrange(x_values, y_values, x):
+    def lagrange(x_values, y_values, x_to_interpolate):
         """
-        Método de Interpolación de Lagrange.
+        Interpolation method for Lagrange polynomials.
 
-        Parámetros:
-        x_values : list[float] - Lista de los valores de x (puntos conocidos).
-        y_values : list[float] - Lista de los valores de y (resultados conocidos).
-        x : float - El valor en el que se desea evaluar el polinomio interpolante.
+        Parameters:
+        x_values : list[float] - List of x values (known points).
+        y_values : list[float] - List of y values (known results).
+        x_to_interpolate : float - The x value at which to interpolate the polynomial.
 
-        Retorna:
-        float - El valor interpolado de la función en x.
+        Returns:
+        dict - Dictionary with the table, message, headers, plot data, and interpolated value.
         """
         n = len(x_values)
-        result = 0.0
+        if n != len(y_values):
+            raise ValueError("The vectors x and y must have the same length.")
         
-        # Calculamos la interpolación de Lagrange
+        # Calculate Lagrange basis polynomials and their coefficients
+        coefficients = []
         for i in range(n):
-            # Calcular el término L_i(x)
-            term = y_values[i]
+            # Lagrange basis polynomial L_i(x)
+            L_i = 1
             for j in range(n):
                 if i != j:
-                    term *= (x - x_values[j]) / (x_values[i] - x_values[j])
-            result += term
-        
-        return result
+                    L_i *= np.poly1d([1, -x_values[j]]) / (x_values[i] - x_values[j])
+            
+            # Multiply L_i(x) by y_i and collect the terms to find the coefficients
+            poly = L_i * y_values[i]
+            coefficients.append(poly)
 
+        # Sum all the individual polynomials to get the final polynomial
+        final_poly = sum(coefficients)
+
+        # Evaluate the final polynomial at the given x_to_interpolate
+        interpolated_value = final_poly(x_to_interpolate)
+
+        # Get the coefficients of the final polynomial
+        final_coeffs = final_poly.coefficients
+
+        # Create the table with the coefficients for each basis polynomial and the final polynomial
+        table = []
+        for i in range(n):
+            L_i_str = f"L_{i}(x) = "
+            terms = [f"{coef} * (x - {x_values[j]})" for j, coef in enumerate(coefficients[i].coefficients)]
+            L_i_str += ' + '.join(terms)
+            table.append([L_i_str, y_values[i]])
+
+        table.append(["Final Polynomial", "y = " + ' + '.join([f"{coef}x^{len(final_coeffs)-i-1}" for i, coef in enumerate(final_coeffs)])])
+
+        # Include interpolated value in the table
+        table.append(["Interpolated Value at x = " + str(x_to_interpolate), interpolated_value])
+
+        headers = ['Basis Polynomial', 'y_i']
+
+        # Prepare the plot data (just the x and y values for plotting)
+        plot_data = {
+            'x': x_values,
+            'y': y_values
+        }
+
+        # Response message and structure
+        response = {
+            'table': table,
+            'message': f"Lagrange interpolation completed successfully. Interpolated value at x = {x_to_interpolate} is {interpolated_value}.",
+            'headers': headers,
+            'plot_data': plot_data,
+            'interpolated_value': interpolated_value
+        }
+
+        return response
 
     @staticmethod
     def spline_linear(x_values, y_values):

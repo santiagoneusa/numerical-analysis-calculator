@@ -73,7 +73,6 @@ def fixed_point(request):
             response = NonLinearEquationsMethods.fixed_point(
                 g_function, initial_guess, tolerance, iterations_limit
             )
-
             template_data["response"] = response
 
             # Preparar datos para la gráfica
@@ -111,7 +110,7 @@ def false_position(request):
 
             # Parsear la función
             function = EquationsManager.parse_function(function_str)
-
+            
             # Ejecutar el método de falsa posición
             response = NonLinearEquationsMethods.false_position(
                 a, b, function, tolerance, iterations_limit
@@ -239,7 +238,7 @@ def multiple_roots_v1(request):
             plot_b = approximate_root + 1
 
             template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
-            print(f"Plot data: {template_data['plot_data']}")
+           
 
             return render(request, 'non_linear_equations/multiple_roots_v1.html', {'template_data': template_data})
         else:
@@ -278,7 +277,7 @@ def multiple_roots_v2(request):
             plot_b = approximate_root + 1
 
             template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
-            print(f"Plot data: {template_data['plot_data']}")
+            
 
             return render(request, 'non_linear_equations/multiple_roots_v2.html', {'template_data': template_data})
         else:

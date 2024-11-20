@@ -1,35 +1,56 @@
-{% extends 'non_linear_equations/base_methods.html' %}
+{% extends 'interpolation/base_methods.html' %}
 
 {% block input_section %}
 <form action="{% url 'methods.lagrange' %}" method="POST">
     {% csrf_token %}
-    
-    <!-- Entrada para los valores de x -->
-    <div class="row g-3 align-items-center">
-        <div class="col mb-3">
-            <label for="x_values" class="form-label">X Values (Known points)</label>
-            <textarea class="form-control" id="x_values" name="x_values" rows="2" placeholder="Enter the x values separated by commas. For example: 1, 2, 3" required></textarea>
-        </div>
+
+    <div class="mb-3">
+        <label for="x_values" class="form-label">x values</label>
+        <input type="text" class="form-control" id="x_values" name="x_values" required>
+        <small class="form-text text-muted">Example: "1 2 3 4 5"</small>
     </div>
-    
-    <!-- Entrada para los valores de y -->
-    <div class="row g-3 align-items-center">
-        <div class="col mb-3">
-            <label for="y_values" class="form-label">Y Values (Results)</label>
-            <textarea class="form-control" id="y_values" name="y_values" rows="2" placeholder="Enter the y values separated by commas. For example: 2, 4, 6" required></textarea>
-        </div>
+
+    <div class="mb-3">
+        <label for="y_values" class="form-label">y values</label>
+        <input type="text" class="form-control" id="y_values" name="y_values" required>
+        <small class="form-text text-muted">Example: "2 3 5 4 6"</small>
     </div>
-    
-    <!-- Entrada para el valor de x en el que se desea evaluar -->
-    <div class="row g-3 align-items-center">
-        <div class="mb-3">
-            <label for="x" class="form-label">X Value to Interpolate</label>
-            <input type="text" class="form-control" id="x" name="x" placeholder="Enter the x value to interpolate" required>
-        </div>
+
+    <div class="mb-3">
+        <label for="x" class="form-label">x value to interpolate</label>
+        <input type="number" class="form-control" id="x" name="x" required>
+        <small class="form-text text-muted">Example: "2.5"</small>
     </div>
 
     <div class="text-center">
-        <button type="submit" class="btn btn-primary">Run Lagrange Interpolation</button>
+        <button type="submit" class="btn btn-primary">Calculate Lagrange Interpolation</button>
     </div>
 </form>
 {% endblock input_section %}
+
+{% block results_section %}
+{% if template_data %}
+    <h4 class="mt-4">Polynomial Calculation Details:</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <tbody>
+                {% if template_data.table %}
+                    {% for row in template_data.table %}
+                        <tr>
+                            {% for cell in row %}
+                                <td class="text-center">{{ cell }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">No data available</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <h4>Graphic of the Interpolation:</h4>
+    <img src="data:image/png;base64,{{ template_data.graphic }}" alt="Graphic of Lagrange">
+{% endif %}
+{% endblock results_section %}
