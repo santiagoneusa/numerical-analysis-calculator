@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from methods.methods.InterpolationMethods import InterpolationMethods
+from io import BytesIO
 
 class PlotManager:
     @staticmethod
@@ -23,27 +24,43 @@ class PlotManager:
         }
 
 
-    @staticmethod
     def plot_newton_divided_difference(x_values, y_values, polynomial_function):
-        # Prepare the plot
-        fig, ax = plt.subplots()
-        ax.plot(x_values, y_values, 'o', label='Given points', color='red')
+        import matplotlib
+        matplotlib.use('Agg')  # Usar el backend sin interfaz gráfica
+        import matplotlib.pyplot as plt
+        import numpy as np
+        from io import BytesIO
 
-        x_dense = np.linspace(min(x_values), max(x_values), 1000)
-        y_dense = [polynomial_function(xi) for xi in x_dense]
-        ax.plot(x_dense, y_dense, '-', label='Interpolating Polynomial')
+        # Generar la figura
+        fig, ax = plt.subplots(figsize=(8, 6))
+        ax.plot(x_values, y_values, 'o', label='Data points')
 
+        # Generar el rango de x para el polinomio
+        x_range = np.linspace(min(x_values) - 1, max(x_values) + 1, 500)
+        y_range = [polynomial_function(x) for x in x_range]
+
+        ax.plot(x_range, y_range, '-', label='Interpolation Polynomial')
         ax.legend()
         ax.grid()
 
-        # Save the figure as a base64 encoded string
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        # Guardar como SVG
+        svg_output = BytesIO()
+        plt.savefig(svg_output, format='svg', bbox_inches='tight')
+        plt.close(fig)
 
-        return img_base64
-    
+        # Leer el contenido SVG generado
+        svg_output.seek(0)
+        svg_data = svg_output.getvalue().decode('utf-8')
+
+        # Imprimir el contenido SVG para depuración
+        print("SVG Data:", svg_data[:500])  # Imprime los primeros 500 caracteres del SVG
+
+        # Si el archivo es vacío, entonces probablemente ocurrió un error al generar el gráfico.
+        if not svg_data.startswith('<svg'):
+            print("Error: SVG no comienza correctamente.")
+
+        return svg_data
+
 
     @staticmethod
     def plot_linear_spline(x, y, coefficients):

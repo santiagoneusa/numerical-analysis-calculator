@@ -48,18 +48,30 @@
     <p>{{ template_data.plot_data.polynomial }}</p>
 
     <h4>Graphic of the Interpolation:</h4>
-    <img id="newton-graph" src="data:image/png;base64,{{ template_data.graphic }}" alt="Graphic of Newton Interpolation">
+    <div id="newton-graph-container">
+        <!-- Aquí se renderiza el gráfico SVG -->
+        {{ template_data.graphic|safe }}
+    </div>    
 
     <!-- Download button -->
     <div class="text-center" style="margin-top: 15px;">
-        <a id="download-button" class="btn btn-primary" href="#" download="newton_interpolation.png">Download Graph</a>
+        <a id="download-button" class="btn btn-primary" href="#" download="newton_interpolation.svg">Download Graph</a>
     </div>
 {% endif %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var img = document.getElementById('newton-graph');
+        var svgContainer = document.getElementById('newton-graph-container');
         var downloadButton = document.getElementById('download-button');
-        downloadButton.href = img.src;
+
+        // Verifica si el contenedor SVG tiene contenido
+        if (svgContainer) {
+            var svg = svgContainer.innerHTML;
+
+            // Crea un Blob con el contenido SVG para descargarlo
+            var blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            downloadButton.href = url;
+        }
     });
 </script>
 {% endblock results_section %}

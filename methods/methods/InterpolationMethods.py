@@ -63,6 +63,7 @@ class InterpolationMethods:
 
         return response
     
+
     @staticmethod
     def newton_divided_difference(x_values, y_values):
         n = len(x_values)
@@ -98,12 +99,6 @@ class InterpolationMethods:
         # Extract the coefficients (first entry of each column)
         coefficients = [divided_diff_table[i, i] for i in range(n)]
 
-        # Create the divided difference table for the response
-        table = []
-        for j in range(n):
-            for i in range(j, n):
-                table.append([f"({x[i]}, {y[i]})", coefficients[i], divided_diff_table[i, j]])
-
         # Define the polynomial function
         def polynomial_function(value):
             result = coefficients[0]
@@ -113,7 +108,7 @@ class InterpolationMethods:
                 result += coefficients[i] * product
             return result
 
-        # Prepare the data for plotting
+        # Prepare the data for the response
         plot_data = {
             'x': x.tolist(),
             'y': y.tolist(),
@@ -121,30 +116,12 @@ class InterpolationMethods:
             'polynomial_function': polynomial_function
         }
 
-        # Generate the graphic
-        fig, ax = plt.subplots()
-        ax.plot(x, y, 'o', label='Given points', color='red')
-
-        x_dense = np.linspace(min(x), max(x), 1000)
-        y_dense = [polynomial_function(xi) for xi in x_dense]
-        ax.plot(x_dense, y_dense, '-', label='Interpolating Polynomial')
-
-        ax.legend()
-        ax.grid()
-
-        # Save the figure as a base64 encoded string
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
-
-        # Prepare the response
+        # Return the results
         response = {
-            'table': table,
-            'headers': ['Step', 'Coefficient', 'Current Term'],
-            'message': "Calculation completed successfully.",
-            'plot_data': plot_data,
-            'graphic': img_base64
+            'polynomial': polynomial_function,
+            'coefficients': coefficients,
+            'message': "Polynomial calculation completed successfully.",
+            'plot_data': plot_data
         }
 
         return response
