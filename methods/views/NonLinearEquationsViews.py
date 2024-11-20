@@ -73,7 +73,6 @@ def fixed_point(request):
             response = NonLinearEquationsMethods.fixed_point(
                 g_function, initial_guess, tolerance, iterations_limit
             )
-
             template_data["response"] = response
 
             # Preparar datos para la gráfica
@@ -111,7 +110,7 @@ def false_position(request):
 
             # Parsear la función
             function = EquationsManager.parse_function(function_str)
-
+            
             # Ejecutar el método de falsa posición
             response = NonLinearEquationsMethods.false_position(
                 a, b, function, tolerance, iterations_limit

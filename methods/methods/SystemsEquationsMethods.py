@@ -53,14 +53,14 @@ class SystemsEquationsMethods:
         
         
     @staticmethod
-    def gauss_seidel(x0, A, b, Tol, niter):
+    def gauss_seidel(A, b, x0, Tol, niter):
         """
         Método de Gauss-Seidel para resolver sistemas de ecuaciones lineales.
 
         Parámetros:
-        x0 : list[float] - Aproximación inicial.
         A : list[list[float]] - Matriz de coeficientes.
         b : list[float] - Vector del lado derecho.
+        x0 : list[float] - Aproximación inicial.
         Tol : float - Tolerancia para la convergencia.
         niter : int - Número máximo de iteraciones.
 
@@ -70,26 +70,26 @@ class SystemsEquationsMethods:
         counter = 0
         error = Tol + 1
         n = len(A)
-        x = x0.copy()
+        x = np.array(x0, dtype=float)  # Convertir x0 a un array de numpy para manipulación
         errors = []
         table = []
 
         while error > Tol and counter < niter:
-            x_new = x.copy()
+            x_new = x.copy()  # Hacemos una copia para evitar modificar x mientras lo usamos
             for i in range(n):
                 # Sumar las contribuciones anteriores y posteriores
-                sum1 = sum(A[i][j] * x_new[j] for j in range(i))
-                sum2 = sum(A[i][j] * x[j] for j in range(i + 1, n))
+                sum1 = sum(A[i][j] * x_new[j] for j in range(i))  # i-th row, before i-th element
+                sum2 = sum(A[i][j] * x[j] for j in range(i + 1, n))  # i-th row, after i-th element
                 # Actualizar la solución para x[i]
                 x_new[i] = (b[i] - sum1 - sum2) / A[i][i]
 
             # Calcular el error relativo
             relative_error_vector = np.abs((x_new - x) / x_new)
-            error = np.linalg.norm(relative_error_vector, np.inf)
+            error = np.linalg.norm(relative_error_vector, np.inf)  # Calculamos el error infinito
             errors.append(error)
 
             counter += 1
-            x = x_new.copy()
+            x = x_new.copy()  # Actualizamos x con la nueva solución
 
             # Guardar datos de iteración en la tabla
             table.append([counter, x.copy(), error])
