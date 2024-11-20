@@ -4,9 +4,54 @@ from methods.utils.ResponseManager import ResponseManager
 class SystemsEquationsMethods:
 
     @staticmethod
-    def jacobi():
-        pass
+    def jacobi(x0, A, b, Tol, niter):
+        counter = 0
+        error = Tol + 1
+        n = len(A)
+        x = x0.copy()
+        errors = []
+        table = []
 
+        # Precomputar D, L y U (Jacobi usa sólo D y el resto como un conjunto)
+        D = np.diag(np.diag(A))
+        R = A - D  # R = L + U, donde L es la parte inferior y U es la superior de la matriz
+
+        while error > Tol and counter < niter:
+            x_new = np.zeros_like(x)  # Inicializar nueva aproximación
+            for i in range(n):
+                # Calcular la nueva x[i] considerando todo R
+                sum_R = sum(R[i][j] * x[j] for j in range(n))
+                x_new[i] = (b[i] - sum_R) / A[i][i]
+
+            # Calcular el error relativo
+            relative_error_vector = np.abs((x_new - x) / x_new)
+            error = np.linalg.norm(relative_error_vector, np.inf)
+            errors.append(error)
+
+            counter += 1
+            x = x_new.copy()
+
+            # Guardar datos de iteración en la tabla
+            table.append([counter, x.copy(), error])
+
+        if error < Tol:
+            message = f"El método convergió en {counter} iteraciones."
+            status = 'success'
+        else:
+            message = f"El método no convergió en {niter} iteraciones."
+            status = 'warning'
+
+        headers = ['Iteración', 'x', 'Error']
+        return {
+            'status': status,
+            'message': message,
+            'table_headers': headers,
+            'table': table,
+            'solution': x,
+            'errors': errors,
+        }
+        
+        
     @staticmethod
     def gauss_seidel(x0, A, b, Tol, niter):
         """

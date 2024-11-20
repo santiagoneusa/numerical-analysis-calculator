@@ -213,7 +213,7 @@ def secant(request):
 
 def multiple_roots_v1(request):
     template_data = {}
-    template_data["title"] = "Newton-Raphson Method"
+    template_data["title"] = "Multiple Roots v1"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
         ("Non Linear Equations", reverse("home") + "#methods-section"),
@@ -247,9 +247,44 @@ def multiple_roots_v1(request):
 
     except Exception as e:
         template_data = ResponseManager.error_response(str(e))
-        template_data["title"] = "Método de Newton-Raphson"
+        template_data["title"] = "Método de Raíces Múltiples v1"
         return render(request, 'non_linear_equations/multiple_roots_v1.html', {'template_data': template_data})
 
 
 def multiple_roots_v2(request):
-    pass
+    template_data = {}
+    template_data["title"] = "Multiple Roots v2"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Non Linear Equations", reverse("home") + "#methods-section"),
+        ("Multiple Roots Method v2", reverse("methods.multiple_roots_v2")),
+    ]
+
+    try:
+        if request.POST:
+            function_str = request.POST.get("function")
+            function = EquationsManager.parse_function(function_str)
+            x0 = float(request.POST.get("x0"))
+            tol = float(request.POST.get("tolerance"))
+            iterations_limit = int(request.POST.get("iterations_limit"))
+            error_type = request.POST.get("error_type", "relative")
+
+            response = NonLinearEquationsMethods.multiple_roots_v2(x0, tol, iterations_limit, function_str)
+            template_data["response"] = response
+
+            approximate_root = response["table"][-1][1]
+
+            plot_a = approximate_root - 1
+            plot_b = approximate_root + 1
+
+            template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
+            print(f"Plot data: {template_data['plot_data']}")
+
+            return render(request, 'non_linear_equations/multiple_roots_v2.html', {'template_data': template_data})
+        else:
+            return render(request, 'non_linear_equations/multiple_roots_v2.html', {'template_data': template_data})
+
+    except Exception as e:
+        template_data = ResponseManager.error_response(str(e))
+        template_data["title"] = "Método Raíces Múltiples v2"
+        return render(request, 'non_linear_equations/multiple_roots_v2.html', {'template_data': template_data})
