@@ -62,9 +62,18 @@ def fixed_point(request):
     try:
         if request.POST:
             g_function_str = request.POST.get("g_function")
-            initial_guess = float(request.POST.get("initial_guess"))
-            tolerance = float(request.POST.get("tolerance"))
+            initial_guess = float(request.POST.get("initial_guess").replace(',', '.'))
             iterations_limit = int(request.POST.get("iterations_limit"))
+            error_type = request.POST.get("error_type", "relative")
+            tolerance_input = request.POST.get("tolerance").replace(',', '.')
+
+            # Convert tolerance_input to tolerance value
+            if error_type == "relative":
+                k = int(tolerance_input)
+                tolerance = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                tolerance = EquationsManager.correct_decimals_to_tolerance(d)
 
             # Parseamos la función g(x)
             g_function = EquationsManager.parse_function(g_function_str)
@@ -83,7 +92,6 @@ def fixed_point(request):
 
             return render(request, "non_linear_equations/fixed_point.html", {"template_data": template_data})
         else:
-            template_data["response"] = ResponseManager.error_response("All inputs must have a value.")
             return render(request, "non_linear_equations/fixed_point.html", {"template_data": template_data})
     except Exception as e:
         template_data["response"] = ResponseManager.error_response(str(e))
