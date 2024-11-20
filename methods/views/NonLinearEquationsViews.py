@@ -214,7 +214,43 @@ def secant(request):
 
 
 def multiple_roots_v1(request):
-    pass
+    template_data = {}
+    template_data["title"] = "Newton-Raphson Method"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Non Linear Equations", reverse("home") + "#methods-section"),
+        ("Multiple Roots Method v1", reverse("methods.multiple_roots_v1")),
+    ]
+
+    try:
+        if request.POST:
+            function_str = request.POST.get("function")
+            function = EquationsManager.parse_function(function_str)
+            x0 = float(request.POST.get("x0"))
+            multi = float(request.POST.get("multi"))
+            tol = float(request.POST.get("tolerance"))
+            iterations_limit = int(request.POST.get("iterations_limit"))
+            error_type = request.POST.get("error_type", "relative")
+
+            response = NonLinearEquationsMethods.multiple_roots_v1(x0, tol, iterations_limit, multi, function_str)
+            template_data["response"] = response
+
+            approximate_root = response["table"][-1][1]
+
+            plot_a = approximate_root - 1
+            plot_b = approximate_root + 1
+
+            template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
+            print(f"Plot data: {template_data['plot_data']}")
+
+            return render(request, 'non_linear_equations/multiple_roots_v1.html', {'template_data': template_data})
+        else:
+            return render(request, 'non_linear_equations/multiple_roots_v1.html', {'template_data': template_data})
+
+    except Exception as e:
+        template_data = ResponseManager.error_response(str(e))
+        template_data["title"] = "Método de Newton-Raphson"
+        return render(request, 'non_linear_equations/multiple_roots_v1.html', {'template_data': template_data})
 
 
 def multiple_roots_v2(request):
