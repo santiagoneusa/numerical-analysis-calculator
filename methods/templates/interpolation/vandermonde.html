@@ -22,7 +22,11 @@
 {% endblock input_section %}
 
 {% block output_section %}
-    {% if template_data.data.matrix %}
+<pre>Matrix: {{ matrix|default:"No matrix data provided" }}</pre>
+<pre>Polynomial: {{ polynomial|default:"No polynomial data provided" }}</pre>
+<pre>Coefficients: {{ coefficients|default:"No coefficients data provided" }}</pre>
+
+    {% if matrix %}
         <h3>Vandermonde Matrix</h3>
         <table class="table">
             <thead>
@@ -32,7 +36,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for row in template_data.data.matrix %}
+                {% for row in matrix %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ row|join:", " }}</td>
@@ -42,17 +46,28 @@
         </table>
     {% endif %}
 
-    {% if template_data.data.polynomial %}
+    {% if polynomial %}
         <h3>Polynomial</h3>
-        <p>{{ template_data.data.polynomial }}</p>
+        <p>{{ polynomial }}</p>
     {% endif %}
-    
-    {% if template_data.data.coefficients %}
+
+    {% if coefficients %}
         <h3>Coefficients</h3>
-        <ul>
-            {% for coefficient in template_data.data.coefficients %}
-                <li>{{ coefficient }}</li>
-            {% endfor %}
-        </ul>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Term</th>
+                    <th>Coefficient</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for term, coeff in table %}
+                    <tr>
+                        <td>{{ term }}</td>
+                        <td>{{ coeff }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% endif %}
 {% endblock output_section %}
