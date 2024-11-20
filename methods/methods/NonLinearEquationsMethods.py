@@ -309,18 +309,17 @@ class NonLinearEquationsMethods:
         message = f"An approximate root is x = {x_i} with f(x) = {f_x_i}"
         return ResponseManager.success_response(table, message, headers)
 
-
     @staticmethod
     def secant(x0, x1, function, tolerance, iterations_limit, error_type='relative'):
         """
-        Implementation of the Secant method.
+        Implementation of the Secant method with enhanced error handling.
 
         Parameters:
         x0 : float
-            Initial approximation of the root.
+            First initial approximation of the root.
         x1 : float
             Second initial approximation of the root.
-        function : function
+        function : callable
             The function to find the root of.
         tolerance : float
             Tolerance that determines when to stop the iteration.
@@ -330,51 +329,109 @@ class NonLinearEquationsMethods:
             Type of error to calculate ('relative' or 'absolute').
 
         Returns:
-        A response dictionary containing the status, message, table, etc.   
+        A response dictionary containing the status, message, table, etc.
         """
+        # Input validation
+        if not EquationsManager.is_valid_number(x0):
+            return ResponseManager.error_response("Initial approximation x0 must be a valid number.")
+
+        if not EquationsManager.is_valid_number(x1):
+            return ResponseManager.error_response("Initial approximation x1 must be a valid number.")
+
+        if not EquationsManager.is_valid_number(tolerance) or tolerance <= 0:
+            return ResponseManager.error_response("Tolerance must be a positive number.")
+
+        if not isinstance(iterations_limit, int) or iterations_limit <= 0:
+            return ResponseManager.error_response("Iterations limit must be a positive integer.")
+
+        if error_type not in ('relative', 'absolute'):
+            return ResponseManager.error_response("Error type must be 'relative' or 'absolute'.")
+
         table = []
         iteration = 0
-        error = float('inf')
 
-        fx0 = function(x0)
-        fx1 = function(x1)
+        # Evaluate the function at x0 and x1
+        try:
+            fx0 = function(x0)
+            fx1 = function(x1)
+        except Exception as e:
+            return ResponseManager.error_response(f"Error evaluating the function at initial approximations: {e}")
 
+        # Check if fx0 and fx1 are valid numbers
+        if not EquationsManager.is_valid_number(fx0):
+            return ResponseManager.error_response(f"Function evaluation at x0 resulted in an invalid number (f(x0) = {fx0}).")
+
+        if not EquationsManager.is_valid_number(fx1):
+            return ResponseManager.error_response(f"Function evaluation at x1 resulted in an invalid number (f(x1) = {fx1}).")
+
+        # Check for division by zero before starting iterations
         if fx0 == fx1:
-            raise ValueError("Division by zero! f(x0) and f(x1) cannot be the same.")
+            return ResponseManager.error_response("Division by zero! f(x0) and f(x1) cannot be the same.")
 
-        table.append([iteration, x0, fx0, "N/A"])
+        # Initialize error
+        error = 'N/A'  # No error for the first approximation
+
+        # Add initial approximations to the table
+        table.append([iteration, x0, fx0, error])
         iteration += 1
-        error = abs((x1 - x0) / x1) if x1 != 0 else float('inf')
+
+        # Calculate initial error for x1
+        if error_type == 'relative':
+            if x1 != 0:
+                error = abs((x1 - x0) / x1)
+            else:
+                error = float('inf')
+        else:
+            error = abs(x1 - x0)
+
+        # Add second approximation to the table
         table.append([iteration, x1, fx1, error])
 
-        while iteration < iterations_limit and error > tolerance:
+        # Start iterations
+        while iteration < iterations_limit:
             if fx0 == fx1:
-                raise ValueError("Division by zero encountered during iterations.")
+                return ResponseManager.error_response("Division by zero encountered during iterations (f(x0) == f(x1)).")
 
+            # Compute new approximation
             x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0)
-            fx2 = function(x2)
+
+            # Evaluate the function at x2
+            try:
+                fx2 = function(x2)
+            except Exception as e:
+                return ResponseManager.error_response(f"Error evaluating the function at x = {x2}: {e}")
+
+            # Check if fx2 is a valid number
+            if not EquationsManager.is_valid_number(fx2):
+                return ResponseManager.error_response(f"Function evaluation resulted in an invalid number at x = {x2} (f(x) = {fx2}).")
 
             # Calculate the error based on the selected error type
             if error_type == 'relative':
-                error = abs((x2 - x1) / x2) if x2 != 0 else float('inf')
+                if x2 != 0:
+                    error = abs((x2 - x1) / x2)
+                else:
+                    error = float('inf')  # Cannot compute relative error when x2 is zero
             else:  # Absolute error
                 error = abs(x2 - x1)
 
+            # Add data to the table
             iteration += 1
             table.append([iteration, x2, fx2, error])
 
+            # Check for convergence
+            if abs(fx2) <= tolerance or error <= tolerance:
+                message = f"An approximate root is x = {x2} with f(x) = {fx2}"
+                headers = ['Iteration', 'x', 'f(x)', 'Error']
+                return ResponseManager.success_response(table, message, headers)
+
+            # Prepare for next iteration
             x0, x1 = x1, x2
             fx0, fx1 = fx1, fx2
 
-            if error <= tolerance or fx2 == 0:
-                break
-
-        if error <= tolerance or fx2 == 0:
-            message = f"An approximate root is x = {x2} with f(x) = {fx2}"
-            return ResponseManager.success_response(table, message)
-        else:
-            message = f"The method did not converge after {iterations_limit} iterations."
-            return ResponseManager.warning_response(table, message)
+        # If the method did not converge within the iteration limit
+        message = f"The method did not converge after {iterations_limit} iterations."
+        headers = ['Iteration', 'x', 'f(x)', 'Error']
+        return ResponseManager.warning_response(table, message, headers)
 
     @staticmethod
     def multiple_roots_v1(x0, tol, iterations_limit, multi, function ):
@@ -420,9 +477,6 @@ class NonLinearEquationsMethods:
         else:
             return ResponseManager.success_response(table)
             
-            
-        
-
     @staticmethod
     def multiple_roots_v2(x0, tol, iterations_limit, function):
         
