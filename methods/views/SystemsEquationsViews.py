@@ -67,8 +67,17 @@ def gauss_seidel(request):
             A_string = request.POST.get('A')
             b_string = request.POST.get('b')
             x0_string = request.POST.get('x0')
-            Tol = float(request.POST.get('tolerance'))
+            error_type = request.POST.get('error_type', "relative")
+            tolerance_input = request.POST.get('tolerance').replace(',', '.')
             niter = int(request.POST.get('iterations_limit'))
+
+            # Convertir tolerance_input a un valor de tolerancia
+            if error_type == 'relative':
+                k = int(tolerance_input)
+                Tol = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                Tol = EquationsManager.correct_decimals_to_tolerance(d)
 
             # Convertir las entradas en matrices y vectores NumPy
             A = MatricesManager.parse_matrix(A_string)
@@ -82,7 +91,7 @@ def gauss_seidel(request):
                 raise ValueError("The dimensions of A, b, and x0 are not compatible.")
 
             # Llamar al método Gauss-Seidel
-            response = SystemsEquationsMethods.gauss_seidel(A, b, x0, Tol, niter)
+            response = SystemsEquationsMethods.gauss_seidel(A, b, x0, Tol, niter,error_type)
             template_data.update(response)
 
             # Añadir los encabezados para la tabla

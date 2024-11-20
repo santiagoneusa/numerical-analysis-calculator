@@ -62,7 +62,7 @@ class NonLinearEquationsMethods:
             return ResponseManager.success_response(table)
 
     @staticmethod
-    def fixed_point(g_function, initial_guess, tolerance, iterations_limit):
+    def fixed_point(g_function, initial_guess, tolerance, iterations_limit, error_type='relative'):
         """
         Implementation of the Fixed Point Iteration method.
 
@@ -75,50 +75,72 @@ class NonLinearEquationsMethods:
             The tolerance for the stopping condition.
         iterations_limit : int
             The maximum number of iterations allowed.
+        error_type : str
+            The type of error to calculate ('relative' or 'absolute').
 
         Returns:
         A response dictionary containing the status, message, table, etc.
         """
+
+        # Validación de entrada
+        if not isinstance(iterations_limit, int) or iterations_limit <= 0:
+            return ResponseManager.error_response("Iterations limit must be a positive integer.")
+
+        if error_type not in ('relative', 'absolute'):
+            return ResponseManager.error_response("Error type must be 'relative' or 'absolute'.")
 
         # Inicialización de variables
         iteration = 0
         x0 = initial_guess
         error = float('inf')  # Inicializamos el error con un valor grande
         table = []  # Tabla de resultados
-        # Primer valor de la iteración
-        table.append([iteration, x0, g_function(x0), error])
+
+        # Agregar la primera iteración
+        try:
+            g_x0 = g_function(x0)
+            table.append([iteration, x0, g_x0, "N/A"])  # No hay error en la primera iteración
+        except Exception as e:
+            return ResponseManager.error_response(f"Error evaluating the function at x = {x0}: {e}")
 
         # Comienza la iteración
         while iteration < iterations_limit:
             try:
                 x1 = g_function(x0)
             except Exception as e:
-                return ResponseManager.error_response(f"Error evaluating the function: {e}")
+                return ResponseManager.error_response(f"Error evaluating the function at x = {x0}: {e}")
 
             # Calcular el error
             if iteration > 0:
-                error = abs(x1 - x0)  # Error absoluto
-            else:
-                error = float('inf')  # Para la primera iteración, usamos un error arbitrario
+                if error_type == 'relative' and x1 != 0:
+                    error = abs((x1 - x0) / x1)  # Error relativo
+                else:
+                    error = abs(x1 - x0)  # Error absoluto
 
             # Agregar los datos a la tabla
-            table.append([iteration + 1, x1, g_function(x1), error])
+            try:
+                g_x1 = g_function(x1)
+                table.append([iteration + 1, x1, g_x1, error])
+            except Exception as e:
+                return ResponseManager.error_response(f"Error evaluating the function at x = {x1}: {e}")
 
-            # Verificar si el error es menor que la tolerancia
-            if error <= tolerance:
-                message = f"Converged to a root at x = {x1} with g(x) = {g_function(x1)}"
-                return ResponseManager.success_response(table, message)
+            # Verificar si el error o g(x1) cumplen la tolerancia
+            if error <= tolerance or abs(g_x1) <= tolerance:
+                message = f"Converged to a root at x = {x1} with g(x) = {g_x1}"
+                headers = ["Iteration", "x_i", "g(x_i)", "Error"]
+                return ResponseManager.success_response(table, message, headers)
 
             # Preparar para la siguiente iteración
             x0 = x1
             iteration += 1
 
-        # Si no convergió después de los intentos máximos
+        # Si no convergió después del límite de iteraciones
         message = f"Method did not converge after {iterations_limit} iterations."
-        return ResponseManager.warning_response(table, message)
+        headers = ["Iteration", "x_i", "g(x_i)", "Error"]
+        return ResponseManager.warning_response(table, message, headers)
+    
 
     @staticmethod
-    def false_position(a, b, function, tolerance, iterations_limit):
+    def false_position(a, b, function, tolerance, iterations_limit, error_type="relative"):
         """
         Implementation of the False Position (Regula Falsi) method.
 
@@ -133,18 +155,20 @@ class NonLinearEquationsMethods:
             The tolerance for the stopping condition.
         iterations_limit : int
             The maximum number of iterations allowed.
+        error_type : str
+            The type of error ('relative' or 'absolute').
 
         Returns:
         A response dictionary containing the status, message, table, etc.
         """
-        
         if function(a) * function(b) >= 0:
             return ResponseManager.error_response("The function must have opposite signs at f(a) and f(b)")
+
         iteration = 0  # Start from 0
         error = float('inf')  # Initialize the error as infinity for the first iteration
         c = a  # Initialize c with any value
         table = []
-       
+
         # First iteration value
         table.append([iteration, a, b, c, function(c), error])
 
@@ -155,7 +179,10 @@ class NonLinearEquationsMethods:
 
             # Calculate the error
             if iteration > 0:
-                error = abs(c - c_old)
+                if error_type == "relative":
+                    error = abs((c - c_old) / c) if c != 0 else float('inf')  # Relative error
+                else:  # Absolute error
+                    error = abs(c - c_old)
             else:
                 error = float('inf')  # Arbitrary value for the first iteration
 
@@ -163,9 +190,10 @@ class NonLinearEquationsMethods:
             table.append([iteration + 1, a, b, c, fc, error])
 
             # Check for convergence or tolerance
-            if fc == 0 or error <= tolerance:
+            if abs(fc) <= tolerance or error <= tolerance:
                 message = f"Converged to a root at x = {c} with f(x) = {fc}"
-                return ResponseManager.success_response(table, message)
+                headers = ["Iteration", "a", "b", "c", "f(c)", "Error"]
+                return ResponseManager.success_response(table, message, headers)
 
             # Update the interval limits
             if function(a) * fc < 0:
@@ -177,7 +205,8 @@ class NonLinearEquationsMethods:
 
         # If the method did not converge within the iteration limit
         message = f"Method did not converge after {iterations_limit} iterations."
-        return ResponseManager.warning_response(table, message)
+        headers = ["Iteration", "a", "b", "c", "f(c)", "Error"]
+        return ResponseManager.warning_response(table, message, headers)
 
     @staticmethod
     def newton_raphson(function_text, x0, tol, iterations_limit, error_type='relative'):
