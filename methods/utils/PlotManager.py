@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from methods.methods.InterpolationMethods import InterpolationMethods
+import plotly.graph_objs as go
+from plotly.offline import plot
+import numpy as np
 
 class PlotManager:
     @staticmethod
@@ -182,9 +185,7 @@ class PlotManager:
         Returns:
         str - HTML representation of the plot.
         """
-        import plotly.graph_objs as go
-        from plotly.offline import plot
-        import numpy as np
+        
 
         A = plot_data['A']
         b = plot_data['b']
