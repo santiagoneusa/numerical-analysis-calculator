@@ -1,12 +1,68 @@
 import numpy as np
 from methods.utils.ResponseManager import ResponseManager
 
+
+
+
+
+    
+
 class InterpolationMethods:
-
+    
     @staticmethod
-    def vandermonde():
-        pass
+    def vandermonde(x_values, y_values):
+        
+        n = len(x_values)
+        if n != len(y_values):
+            raise ValueError("The vectors x and y must have the same length.")
 
+        # Sort the points by x to avoid problems
+        sorted_indices = np.argsort(x_values)
+        x = np.array(x_values)[sorted_indices]
+        y = np.array(y_values)[sorted_indices]
+        
+        # Construct the Vandermonde matrix A
+        A = np.vander(x, increasing=True)
+        b = np.array(y)
+        
+        # Solve for the coefficients using the Vandermonde matrix
+        coefficients = np.linalg.solve(A, b)
+        
+        # Create the polynomial equation string
+        polynomial = " + ".join([f"{coeff:.4f}*x^{i}" for i, coeff in enumerate(coefficients)])
+        
+        # Prepare a table with the results for easier presentation
+        table = []
+        for i, coeff in enumerate(coefficients):
+            table.append([f"x^{i}", f"{coeff:.4f}"])
+
+        # Prepare the data for plotting (even though it's not used for plotting here)
+        """ plot_data = {
+            'x': x.tolist(),
+            'y': y.tolist(),
+            'coefficients': coefficients.tolist()
+        } """
+
+        # Define the headers for the table
+        headers = ['Term', 'Coefficient']
+
+        # Prepare the final response with success response
+        response = ResponseManager.success_response(
+            table=table,
+            message="Vandermonde method calculation completed successfully.",
+            headers=headers
+        )
+        
+        response['matrix'] = A.tolist()  # Vandermonde matrix as a list
+        response['polynomial'] = polynomial  # Polynomial equation
+        response['coefficients'] = coefficients.tolist()  # Coefficients as a list
+    
+
+        # Add plot_data to the response dictionary (you can use this for later plotting if needed)
+        #response['plot_data'] = plot_data
+
+        return response
+    
     @staticmethod
     def newton_divided_difference(x_values, y_values):
         n = len(x_values)

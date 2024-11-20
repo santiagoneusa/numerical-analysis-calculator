@@ -1,0 +1,58 @@
+{% extends 'interpolation/base_methods.html' %}
+
+{% block input_section %}
+<form action="{% url 'methods.vandermonde' %}" method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="x_values" class="form-label">x values</label>
+        <input type="text" class="form-control" id="x_values" name="x_values" required>
+        <small class="form-text text-muted">Example: "1 2 3 4 5"</small>
+    </div>
+
+    <div class="mb-3">
+        <label for="y_values" class="form-label">y values</label>
+        <input type="text" class="form-control" id="y_values" name="y_values" required>
+        <small class="form-text text-muted">Example: "2 3 5 4 6"</small>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Calculate Vandermonde</button>
+    </div>
+</form>
+{% endblock input_section %}
+
+{% block output_section %}
+    {% if template_data.data.matrix %}
+        <h3>Vandermonde Matrix</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Values</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in template_data.data.matrix %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row|join:", " }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if template_data.data.polynomial %}
+        <h3>Polynomial</h3>
+        <p>{{ template_data.data.polynomial }}</p>
+    {% endif %}
+    
+    {% if template_data.data.coefficients %}
+        <h3>Coefficients</h3>
+        <ul>
+            {% for coefficient in template_data.data.coefficients %}
+                <li>{{ coefficient }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock output_section %}
