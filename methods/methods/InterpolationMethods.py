@@ -54,6 +54,17 @@ class InterpolationMethods:
         n = len(x_values)
         if n != len(y_values):
             raise ValueError("The vectors x and y must have the same length.")
+        
+        if n < 2:
+            raise ValueError("At least two data points are required for linear spline interpolation.")
+
+        # Validate that x_values are in ascending order
+        if x_values != sorted(x_values):
+            raise ValueError("The x values must be in ascending order.")
+
+        # Validate that x_values are distinct
+        if len(set(x_values)) != len(x_values):
+            raise ValueError("The x values must be distinct (no duplicates).")
 
         # Sort the points by x to avoid problems
         sorted_indices = np.argsort(x_values)
@@ -109,6 +120,13 @@ class InterpolationMethods:
         n = len(x_values)
         if n != len(y_values):
             raise ValueError("The vectors x and y must have the same length.")
+        
+        if n < 2:
+            raise ValueError("At least two data points are required for quadratic spline interpolation.")
+
+        # Validate that x_values are in ascending order
+        if x_values != sorted(x_values):
+            raise ValueError("The x values must be in ascending order.")
 
         # Sort the points by x to avoid problems
         sorted_indices = np.argsort(x_values)
@@ -213,6 +231,13 @@ class InterpolationMethods:
         n = len(x_values)
         if n != len(y_values):
             raise ValueError("The vectors x and y must have the same length.")
+        
+        if n < 2:
+            raise ValueError("At least two data points are required for cubic spline interpolation.")
+
+        # Validate that x_values are in ascending order
+        if x_values != sorted(x_values):
+            raise ValueError("The x values must be in ascending order.")
 
         # Sort the points by x to avoid problems
         sorted_indices = np.argsort(x_values)
