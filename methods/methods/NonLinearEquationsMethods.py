@@ -2,6 +2,7 @@ import numpy as np
 import sympy as sp
 from methods.utils.ResponseManager import ResponseManager
 from methods.utils.SympyEquationsManager import SympyEquationsManager
+from methods.utils.EquationsManager import EquationsManager
 
 
 class NonLinearEquationsMethods:
@@ -181,7 +182,7 @@ class NonLinearEquationsMethods:
     @staticmethod
     def newton_raphson(function_text, x0, tol, iterations_limit, error_type='relative'):
         """
-        Implementation of the Newton-Raphson method.
+        Implementation of the Newton-Raphson method with enhanced error handling.
 
         Parameters:
         function_text : str
@@ -198,48 +199,95 @@ class NonLinearEquationsMethods:
         Returns:
         A response dictionary containing the status, message, table, etc.
         """
-
         x = sp.symbols('x')
+
+        # Input validation
+        if not EquationsManager.is_valid_number(x0):
+            return ResponseManager.error_response("Initial guess x0 must be a valid number.")
+
+        if not EquationsManager.is_valid_number(tol) or tol <= 0:
+            return ResponseManager.error_response("Tolerance must be a positive number.")
+
+        if not isinstance(iterations_limit, int) or iterations_limit <= 0:
+            return ResponseManager.error_response("Iterations limit must be a positive integer.")
+
+        if error_type not in ('relative', 'absolute'):
+            return ResponseManager.error_response("Error type must be 'relative' or 'absolute'.")
 
         # Parse the function and its derivative
         try:
-            f_sym = sp.sympify(function_text.replace('^', '**'))
+            # Replace '^' with '**' for exponentiation
+            function_text = function_text.replace('^', '**')
+            f_sym = sp.sympify(function_text)
             f_num = sp.lambdify(x, f_sym, modules=['numpy'])
             df_sym = sp.diff(f_sym, x)
             df_num = sp.lambdify(x, df_sym, modules=['numpy'])
         except Exception as e:
             return ResponseManager.error_response(f"Error parsing the function or its derivative: {e}")
-        
 
         # Initialize variables
         x_i = x0
-        error = float('inf')
         iterations = 0
-        prev_x_i = None
         table = []
+        prev_x_i = None  # No previous approximation yet
 
         # Start of iterations
-        while error > tol and iterations < iterations_limit:
+        while iterations < iterations_limit:
+            # Check if x_i is valid
+            if not EquationsManager.is_valid_number(x_i):
+                return ResponseManager.error_response(f"Current approximation x = {x_i} is not a valid number. Cannot continue.")
+
             try:
                 f_x_i = f_num(x_i)
                 df_x_i = df_num(x_i)
-                
             except Exception as e:
-                return ResponseManager.error_response(f"Error evaluating the function or its derivative: {e}")
+                return ResponseManager.error_response(f"Error evaluating the function or its derivative at x = {x_i}: {e}")
 
+            # Check if f_x_i and df_x_i are valid numbers
+            if not EquationsManager.is_valid_number(f_x_i):
+                return ResponseManager.error_response(f"The function evaluation resulted in an invalid number at x = {x_i} (f(x) = {f_x_i}). Cannot continue.")
+
+            if not EquationsManager.is_valid_number(df_x_i):
+                return ResponseManager.error_response(f"The derivative evaluation resulted in an invalid number at x = {x_i} (f'(x) = {df_x_i}). Cannot continue.")
+
+            # Check if f_x_i or df_x_i are complex numbers
+            if isinstance(f_x_i, complex):
+                return ResponseManager.error_response(f"The function evaluation resulted in a complex number at x = {x_i} (f(x) = {f_x_i}). Cannot continue.")
+
+            if isinstance(df_x_i, complex):
+                return ResponseManager.error_response(f"The derivative evaluation resulted in a complex number at x = {x_i} (f'(x) = {df_x_i}). Cannot continue.")
+
+            # Check if derivative is zero
             if df_x_i == 0:
                 return ResponseManager.error_response(f"The derivative is zero at x = {x_i}. Cannot continue.")
 
+            # Update x_i
             new_x_i = x_i - f_x_i / df_x_i
 
+            # Check if new_x_i is valid
+            if not EquationsManager.is_valid_number(new_x_i):
+                return ResponseManager.error_response(f"The new approximation resulted in an invalid number (x = {new_x_i}). Cannot continue.")
+
             # Calculate the error
-            if iterations > 0:
-                if error_type == 'relative' and new_x_i != 0:
-                    error = abs((new_x_i - prev_x_i) / new_x_i)
-                else:
-                    error = abs(new_x_i - prev_x_i)
+            if prev_x_i is None:
+                error = 'N/A'  # No error for the first iteration
             else:
-                error = float('inf')
+                if error_type == 'relative':
+                    if new_x_i != 0:
+                        error = abs((new_x_i - x_i) / new_x_i)
+                    else:
+                        error = float('inf')  # Cannot compute relative error when new_x_i is zero
+                else:  # Absolute error
+                    error = abs(new_x_i - x_i)
+
+                # Check if error is valid
+                if not EquationsManager.is_valid_number(error):
+                    return ResponseManager.error_response(f"The error calculation resulted in an invalid number (error = {error}). Cannot continue.")
+
+                # Check for convergence
+                if abs(f_x_i) <= tol or error <= tol:
+                    table.append([iterations, x_i, f_x_i, error])
+                    break
 
             # Add data to the table
             table.append([iterations, x_i, f_x_i, error])
@@ -249,14 +297,19 @@ class NonLinearEquationsMethods:
             x_i = new_x_i
             iterations += 1
 
-        # Prepare the response
-        if abs(f_x_i) <= tol or error <= tol:
-            message = f"An approximate root is x = {x_i} with f(x) = {f_x_i}"
-            return ResponseManager.success_response(table, message)
         else:
-            message = f"The method did not converge after {iterations_limit} iterations."
-            return ResponseManager.warning_response(table, message)
-        
+            # If the loop completes without breaking, check if the solution is acceptable
+            if abs(f_x_i) > tol:
+                message = f"The method did not converge after {iterations_limit} iterations."
+                headers = ['Iteration', 'x_i', 'f(x_i)', 'Error']
+                return ResponseManager.warning_response(table, message, headers)
+
+        # Prepare the success response
+        headers = ['Iteration', 'x_i', 'f(x_i)', 'Error']
+        message = f"An approximate root is x = {x_i} with f(x) = {f_x_i}"
+        return ResponseManager.success_response(table, message, headers)
+
+
     @staticmethod
     def secant(x0, x1, function, tolerance, iterations_limit, error_type='relative'):
         """

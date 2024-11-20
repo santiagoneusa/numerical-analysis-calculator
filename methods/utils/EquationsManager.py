@@ -1,5 +1,6 @@
 import sympy as sp
 import numpy as np
+import math
 
 class EquationsManager:
 
@@ -35,3 +36,7 @@ class EquationsManager:
         E <= 0.5 * 10^(-d)
         """
         return 0.5 * 10**(-d)
+
+    @staticmethod
+    def is_valid_number(value):
+        return isinstance(value, (int, float)) and not math.isnan(value) and not math.isinf(value)
