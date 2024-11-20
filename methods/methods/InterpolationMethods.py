@@ -4,8 +4,20 @@ from methods.utils.ResponseManager import ResponseManager
 class InterpolationMethods:
 
     @staticmethod
-    def vandermonde():
-        pass
+    def vandermonde(x_values, y_values):
+        
+        n = len(x_values)
+        if n != len(y_values):
+            raise ValueError("The vectors x and y must have the same length.")
+
+        # Sort the points by x to avoid problems
+        sorted_indices = np.argsort(x_values)
+        x = np.array(x_values)[sorted_indices]
+        y = np.array(y_values)[sorted_indices]
+        
+        
+        
+        
 
     @staticmethod
     def newton_divided_difference():
