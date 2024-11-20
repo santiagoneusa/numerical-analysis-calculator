@@ -8,12 +8,92 @@ class InterpolationMethods:
         pass
 
     @staticmethod
-    def newton_divided_difference():
-        pass
+    def newton_divided_difference(x_values, y_values):
+        n = len(x_values)
+        
+        # Validaciones
+        if n != len(y_values):
+            raise ValueError("The vectors x and y must have the same length.")
+        
+        if n < 2:
+            raise ValueError("At least two data points are required for Newton interpolation.")
+        
+        if x_values != sorted(x_values):
+            raise ValueError("The x values must be in ascending order.")
+        
+        if len(set(x_values)) != len(x_values):
+            raise ValueError("The x values must be distinct (no duplicates).")
 
-    import numpy as np
+        # Sort the points by x to avoid problems
+        sorted_indices = np.argsort(x_values)
+        x = np.array(x_values)[sorted_indices]
+        y = np.array(y_values)[sorted_indices]
 
-class InterpolationMethods:
+        # Calculate the table of divided differences
+        divided_diff_table = np.zeros((n, n))
+        divided_diff_table[:, 0] = y
+
+        for j in range(1, n):
+            for i in range(j, n):
+                divided_diff_table[i, j] = (
+                    divided_diff_table[i, j-1] - divided_diff_table[i-1, j-1]
+                ) / (x[i] - x[i-j])
+
+        # Extract the coefficients (first entry of each column)
+        coefficients = [divided_diff_table[i, i] for i in range(n)]
+
+        # Create the divided difference table for the response
+        table = []
+        for j in range(n):
+            for i in range(j, n):
+                table.append([f"({x[i]}, {y[i]})", coefficients[i], divided_diff_table[i, j]])
+
+        # Define the polynomial function
+        def polynomial_function(value):
+            result = coefficients[0]
+            product = 1
+            for i in range(1, n):
+                product *= (value - x[i-1])
+                result += coefficients[i] * product
+            return result
+
+        # Prepare the data for plotting
+        plot_data = {
+            'x': x.tolist(),
+            'y': y.tolist(),
+            'coefficients': coefficients,
+            'polynomial_function': polynomial_function
+        }
+
+        # Generate the graphic
+        fig, ax = plt.subplots()
+        ax.plot(x, y, 'o', label='Given points', color='red')
+
+        x_dense = np.linspace(min(x), max(x), 1000)
+        y_dense = [polynomial_function(xi) for xi in x_dense]
+        ax.plot(x_dense, y_dense, '-', label='Interpolating Polynomial')
+
+        ax.legend()
+        ax.grid()
+
+        # Save the figure as a base64 encoded string
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+
+        # Prepare the response
+        response = {
+            'table': table,
+            'headers': ['Step', 'Coefficient', 'Current Term'],
+            'message': "Calculation completed successfully.",
+            'plot_data': plot_data,
+            'graphic': img_base64
+        }
+
+        return response
+
+
     @staticmethod
     def lagrange(x_values, y_values, x_to_interpolate):
         """

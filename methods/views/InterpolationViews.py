@@ -31,25 +31,70 @@ def vandermonde(request):
 
 def newton_divided_difference(request):
     template_data = {}
-    template_data["title"] = "Newton divided difference method"
+    template_data["title"] = "Newton Divided Difference Method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
         ("Interpolation", reverse("home") + "#methods-section"),
-        ("Newton divided difference", reverse("methods.newton_divided_difference")),
+        ("Newton Divided Difference", reverse("methods.newton_divided_difference")),
     ]
 
-    try:
-        if request.POST:
-            # TODO: Get the inputs
-            # TODO: Implement Newton divided difference method
-            # TODO: Implement the response
-            return render(request, "interpolation/newton_divided_difference.html", {"template_data": template_data})
-        else:
-            template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
+    if request.method == 'POST':
+        x_values_input = request.POST.get('x_values', '')
+        y_values_input = request.POST.get('y_values', '')
+
+        try:
+            # Validate that inputs are not empty
+            if not x_values_input.strip() or not y_values_input.strip():
+                raise ValueError("Both x values and y values must be provided.")
+
+            # Replace commas with spaces and split the inputs
+            x_values_str_list = x_values_input.replace(',', ' ').split()
+            y_values_str_list = y_values_input.replace(',', ' ').split()
+
+            # Convert the inputs to lists of numbers
+            x_values = [float(x) for x in x_values_str_list]
+            y_values = [float(y) for y in y_values_str_list]
+
+            # Validate that they have the same length
+            if len(x_values) != len(y_values):
+                raise ValueError("The vectors x and y must have the same length.")
+
+            # Validate that x_values are distinct
+            if len(set(x_values)) != len(x_values):
+                raise ValueError("The x values must be distinct (no duplicates).")
+
+            # Call the Newton divided difference method
+            response = InterpolationMethods.newton_divided_difference(x_values, y_values)
+
+            # Generate the graphic
+            graphic = PlotManager.plot_newton_divided_difference(
+                x=response['plot_data']['x'],
+                y=response['plot_data']['y'],
+                polynomial=response['plot_data']['polynomial_function']
+            )
+
+            print("Headers:", template_data.get('table_headers'))
+            print("Table rows:", template_data.get('table'))
+            print("Graphic:", template_data.get('graphic')[:100])  # Verifica si el gráfico está presente.
+
+            # Add the graphic to the template_data
+            response['graphic'] = graphic
+
+            template_data.update(response)
             return render(request, "interpolation/newton_divided_difference.html", {"template_data": template_data})
 
-    except Exception as e:
-        template_data = ResponseManager.error_response(e)
+        except ValueError as ve:
+            # Handle specific value errors
+            template_data = ResponseManager.error_response(str(ve))
+            template_data["title"] = "Newton Divided Difference Method"
+            return render(request, "interpolation/newton_divided_difference.html", {"template_data": template_data})
+        except Exception as e:
+            # Handle any other exceptions
+            template_data = ResponseManager.error_response("An unexpected error occurred: " + str(e))
+            template_data["title"] = "Newton Divided Difference Method"
+            return render(request, "interpolation/newton_divided_difference.html", {"template_data": template_data})
+
+    else:
         return render(request, "interpolation/newton_divided_difference.html", {"template_data": template_data})
 
 

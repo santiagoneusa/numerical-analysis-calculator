@@ -22,6 +22,29 @@ class PlotManager:
             "function": function,
         }
 
+
+    @staticmethod
+    def plot_newton_divided_difference(x_values, y_values, polynomial_function):
+        # Prepare the plot
+        fig, ax = plt.subplots()
+        ax.plot(x_values, y_values, 'o', label='Given points', color='red')
+
+        x_dense = np.linspace(min(x_values), max(x_values), 1000)
+        y_dense = [polynomial_function(xi) for xi in x_dense]
+        ax.plot(x_dense, y_dense, '-', label='Interpolating Polynomial')
+
+        ax.legend()
+        ax.grid()
+
+        # Save the figure as a base64 encoded string
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        img_base64 = base64.b64encode(buf.read()).decode('utf-8')
+
+        return img_base64
+    
+
     @staticmethod
     def plot_linear_spline(x, y, coefficients):
         fig, ax = plt.subplots()

@@ -1,0 +1,65 @@
+{% extends 'interpolation/base_methods.html' %}
+
+{% block input_section %}
+<form action="{% url 'methods.newton_divided_difference' %}" method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label for="x_values" class="form-label">x values</label>
+        <input type="text" class="form-control" id="x_values" name="x_values" required>
+        <small class="form-text text-muted">Example: "1 2 3 4 5"</small>
+    </div>
+
+    <div class="mb-3">
+        <label for="y_values" class="form-label">y values</label>
+        <input type="text" class="form-control" id="y_values" name="y_values" required>
+        <small class="form-text text-muted">Example: "2 3 5 4 6"</small>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Calculate Newton Interpolation</button>
+    </div>
+</form>
+{% endblock input_section %}
+
+{% block results_section %}
+{% if template_data.table %}
+    <h4>Divided Difference Table:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                {% for header in template_data.table_headers %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in template_data.table %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h4>Newton Polynomial:</h4>
+    <p>{{ template_data.plot_data.polynomial }}</p>
+
+    <h4>Graphic of the Interpolation:</h4>
+    <img id="newton-graph" src="data:image/png;base64,{{ template_data.graphic }}" alt="Graphic of Newton Interpolation">
+
+    <!-- Download button -->
+    <div class="text-center" style="margin-top: 15px;">
+        <a id="download-button" class="btn btn-primary" href="#" download="newton_interpolation.png">Download Graph</a>
+    </div>
+{% endif %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var img = document.getElementById('newton-graph');
+        var downloadButton = document.getElementById('download-button');
+        downloadButton.href = img.src;
+    });
+</script>
+{% endblock results_section %}
