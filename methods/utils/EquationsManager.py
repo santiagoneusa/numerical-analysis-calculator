@@ -6,10 +6,19 @@ class EquationsManager:
     @staticmethod
     def parse_function(equation_text):
         x = sp.symbols("x")
-        equation_text = equation_text.replace("e^", "exp")
-        equation_text = equation_text.replace("^", "**")
-        equation = sp.sympify(equation_text)
-        return sp.lambdify(x, equation)
+        equation_text = equation_text.replace('^', '**')
+        equation_text = equation_text.replace('e^', 'exp')
+        # Replace 'ln' with 'log' for natural logarithm
+        equation_text = equation_text.replace('ln', 'log')
+        # Ensure that mathematical functions are correctly interpreted
+        # You can add more replacements if needed
+        try:
+            # Parse the equation using sympy
+            equation = sp.sympify(equation_text)
+            # Create a lambda function using numpy modules
+            return sp.lambdify(x, equation, modules=['numpy'])
+        except Exception as e:
+            raise ValueError(f"Error parsing the function: {e}")
 
     @staticmethod
     def significant_figures_to_tolerance(k):

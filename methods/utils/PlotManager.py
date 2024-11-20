@@ -168,3 +168,79 @@ class PlotManager:
         graphic = graphic.decode('utf-8')
 
         return graphic
+
+    @staticmethod
+    def plot_sor_iterations(plot_data):
+        """
+        Generates an HTML plot for the SOR method when A is 2x2.
+        Only plots the two equations and the final solution point.
+
+        Parameters:
+        plot_data : dict
+            Contains 'A', 'b', and 'iterations' keys.
+
+        Returns:
+        str - HTML representation of the plot.
+        """
+        import plotly.graph_objs as go
+        from plotly.offline import plot
+        import numpy as np
+
+        A = plot_data['A']
+        b = plot_data['b']
+        iterations = plot_data['iterations']
+
+        # Extract the final solution point
+        final_point = iterations[-1]
+
+        # Extract equations from Ax = b
+        # Equation 1: a11*x1 + a12*x2 = b1
+        # Equation 2: a21*x1 + a22*x2 = b2
+
+        # Create a range for x1
+        x1_min = min(final_point[0], final_point[0]) - 10
+        x1_max = max(final_point[0], final_point[0]) + 10
+        x1_values = np.linspace(x1_min, x1_max, 400)
+
+        # Avoid division by zero in case A[i][1] is zero
+        if A[0][1] != 0:
+            x2_eq1 = (b[0] - A[0][0] * x1_values) / A[0][1]
+            trace_eq1 = go.Scatter(x=x1_values, y=x2_eq1, mode='lines', name='Equation 1')
+        else:
+            # Vertical line x = b[0]/A[0][0]
+            x_eq1 = b[0] / A[0][0]
+            trace_eq1 = go.Scatter(x=[x_eq1, x_eq1], y=[x1_min, x1_max], mode='lines', name='Equation 1')
+
+        if A[1][1] != 0:
+            x2_eq2 = (b[1] - A[1][0] * x1_values) / A[1][1]
+            trace_eq2 = go.Scatter(x=x1_values, y=x2_eq2, mode='lines', name='Equation 2')
+        else:
+            # Vertical line x = b[1]/A[1][0]
+            x_eq2 = b[1] / A[1][0]
+            trace_eq2 = go.Scatter(x=[x_eq2, x_eq2], y=[x1_min, x1_max], mode='lines', name='Equation 2')
+
+        # Final solution point
+        trace_final_point = go.Scatter(
+            x=[final_point[0]],
+            y=[final_point[1]],
+            mode='markers',
+            name='Final Solution',
+            marker=dict(size=10, color='red')
+        )
+
+        # Layout
+        layout = go.Layout(
+            title='SOR Method Final Solution',
+            xaxis=dict(title='x1'),
+            yaxis=dict(title='x2'),
+            showlegend=True
+        )
+
+        # Combine traces
+        data = [trace_eq1, trace_eq2, trace_final_point]
+        fig = go.Figure(data=data, layout=layout)
+
+        # Generate the HTML representation
+        plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+
+        return plot_div

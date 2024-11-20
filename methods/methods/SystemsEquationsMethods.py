@@ -124,6 +124,9 @@ class SystemsEquationsMethods:
         niter : int - Maximum number of iterations.
         w : float - Relaxation parameter.
         error_type : str - Type of error to calculate ('relative' or 'absolute').
+
+        Returns:
+        dict - Contains status, message, headers, table, solution, errors, and plot data if applicable.
         """
         counter = 0
         error = float('inf')
@@ -131,6 +134,11 @@ class SystemsEquationsMethods:
         x = x0.copy()
         errors = []
         table = []
+
+        # For plotting purposes if A is 2x2
+        plot_data = None
+        if n == 2:
+            plot_points = [x.copy()]  # Store the initial guess
 
         while error > Tol and counter < niter:
             x_new = x.copy()
@@ -155,7 +163,9 @@ class SystemsEquationsMethods:
             # Add data to the table
             table.append([counter, x.copy(), error])
 
-            # Optional: Check for divergence (can be implemented if needed)
+            # Collect plot points if A is 2x2
+            if n == 2:
+                plot_points.append(x.copy())
 
         if error <= Tol:
             message = f"The method converged in {counter} iterations."
@@ -165,7 +175,8 @@ class SystemsEquationsMethods:
             status = 'warning'
 
         headers = ['Iteration', 'x', 'Error']
-        return {
+
+        result = {
             'status': status,
             'message': message,
             'table_headers': headers,
@@ -173,3 +184,13 @@ class SystemsEquationsMethods:
             'solution': x,
             'errors': errors,
         }
+
+        # If A is 2x2, prepare plot data
+        if n == 2:
+            result['plot_data'] = {
+                'A': A,
+                'b': b,
+                'iterations': plot_points,
+            }
+
+        return result
