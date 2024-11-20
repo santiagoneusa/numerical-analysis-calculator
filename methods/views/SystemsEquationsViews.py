@@ -91,11 +91,16 @@ def gauss_seidel(request):
                 raise ValueError("The dimensions of A, b, and x0 are not compatible.")
 
             # Llamar al método Gauss-Seidel
-            response = SystemsEquationsMethods.gauss_seidel(A, b, x0, Tol, niter,error_type)
+            response = SystemsEquationsMethods.gauss_seidel(A, b, x0, Tol, niter, error_type)
             template_data.update(response)
 
             # Añadir los encabezados para la tabla
             template_data['table_headers'] = ['Iteration', 'x', 'Error']
+
+            # Si los datos de la gráfica están disponibles, generarla
+            if 'plot_data' in response:
+                plot_html = PlotManager.plot_sor_iterations(response['plot_data'])
+                template_data['plot_html'] = plot_html
 
             # Renderizar la página con los resultados
             return render(request, "systems_equations/gauss_seidel.html", {"template_data": template_data})
