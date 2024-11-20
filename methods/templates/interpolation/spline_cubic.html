@@ -1,7 +1,7 @@
 {% extends 'interpolation/base_methods.html' %}
 
 {% block input_section %}
-<form action="{% url 'methods.spline_quadratic' %}" method="POST">
+<form action="{% url 'methods.spline_cubic' %}" method="POST">
     {% csrf_token %}
 
     <div class="mb-3">
@@ -17,14 +17,14 @@
     </div>
 
     <div class="text-center">
-        <button type="submit" class="btn btn-primary">Calculate Quadratic Spline</button>
+        <button type="submit" class="btn btn-primary">Calculate Cubic Spline</button>
     </div>
 </form>
 {% endblock input_section %}
 
 {% block results_section %}
 {% if template_data.table %}
-    <h4>Coefficients of the Quadratic Splines:</h4>
+    <h4>Coefficients of the Cubic Splines:</h4>
     <table class="table">
         <thead>
             <tr>
@@ -44,14 +44,17 @@
         </tbody>
     </table>
 
-    <h4>Graph of the Quadratic Spline Interpolation:</h4>
-    <img id="spline-graph" src="data:image/png;base64,{{ template_data.graphic }}" alt="Quadratic Spline Graph">
+    <h4>Graph of the Cubic Spline Interpolation:</h4>
+    <img id="spline-graph" src="data:image/png;base64,{{ template_data.graphic }}" alt="Cubic Spline Graph">
 
     <!-- Download button -->
     <div class="text-center" style="margin-top: 15px;">
-        <a id="download-button" class="btn btn-primary" href="#" download="quadratic_spline.png">Download Graph</a>
+        <a id="download-button" class="btn btn-primary" href="#" download="cubic_spline.png">Download Graph</a>
     </div>
 {% endif %}
+{% endblock results_section %}
+
+<!-- JavaScript to enable download functionality -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var img = document.getElementById('spline-graph');
@@ -61,5 +64,3 @@
         downloadButton.href = img.src;
     });
 </script>
-
-{% endblock results_section %}
