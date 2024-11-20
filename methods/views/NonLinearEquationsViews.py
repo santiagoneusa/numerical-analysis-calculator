@@ -262,25 +262,37 @@ def multiple_roots_v1(request):
     ]
 
     try:
-        if request.POST:
+        if request.method == 'POST':
             function_str = request.POST.get("function")
-            function = EquationsManager.parse_function(function_str)
-            x0 = float(request.POST.get("x0"))
-            multi = float(request.POST.get("multi"))
-            tol = float(request.POST.get("tolerance"))
+            x0 = float(request.POST.get("x0").replace(',', '.'))
+            multiplicity = int(request.POST.get("multi"))
             iterations_limit = int(request.POST.get("iterations_limit"))
             error_type = request.POST.get("error_type", "relative")
+            tolerance_input = request.POST.get("tolerance").replace(',', '.')
 
-            response = NonLinearEquationsMethods.multiple_roots_v1(x0, tol, iterations_limit, multi, function_str)
+            # Convert tolerance_input to numerical tolerance
+            if error_type == 'relative':
+                k = int(tolerance_input)
+                tol = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                tol = EquationsManager.correct_decimals_to_tolerance(d)
+
+            # Parse the function
+            function = EquationsManager.parse_function(function_str)
+
+            # Call the method
+            response = NonLinearEquationsMethods.multiple_roots_v1(
+                x0, tol, iterations_limit, multiplicity, function_str, error_type
+            )
             template_data["response"] = response
 
-            approximate_root = response["table"][-1][1]
-
-            plot_a = approximate_root - 1
-            plot_b = approximate_root + 1
-
-            template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
-           
+            # Plotting (optional)
+            if response["status"] == "success":
+                approximate_root = response["table"][-1][1]
+                plot_a = approximate_root - 1
+                plot_b = approximate_root + 1
+                template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
 
             return render(request, 'non_linear_equations/multiple_roots_v1.html', {'template_data': template_data})
         else:
@@ -288,7 +300,7 @@ def multiple_roots_v1(request):
 
     except Exception as e:
         template_data = ResponseManager.error_response(str(e))
-        template_data["title"] = "Método de Raíces Múltiples v1"
+        template_data["title"] = "Multiple Roots v1"
         return render(request, 'non_linear_equations/multiple_roots_v1.html', {'template_data': template_data})
 
 
