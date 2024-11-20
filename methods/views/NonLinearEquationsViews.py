@@ -180,15 +180,26 @@ def secant(request):
     ]
 
     try:
-        if request.POST:
-            x0 = float(request.POST.get("x0"))
-            x1 = float(request.POST.get("x1"))
+        if request.method == 'POST':
+            x0 = float(request.POST.get("x0").replace(',', '.'))
+            x1 = float(request.POST.get("x1").replace(',', '.'))
             function_str = request.POST.get("function")
             function = EquationsManager.parse_function(function_str)
-            tolerance = float(request.POST.get("correct_decimals"))
             iterations_limit = int(request.POST.get("iterations_limit"))
+            error_type = request.POST.get("error_type", "relative")
+            tolerance_input = request.POST.get("tolerance").replace(',', '.')
+            
+            # Convert tolerance_input to tolerance value
+            if error_type == 'relative':
+                k = int(tolerance_input)
+                tolerance = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                tolerance = EquationsManager.correct_decimals_to_tolerance(d)
 
-            response = NonLinearEquationsMethods.secant(x0, x1, function, tolerance, iterations_limit)
+            response = NonLinearEquationsMethods.secant(
+                x0, x1, function, tolerance, iterations_limit, error_type
+            )
 
             template_data["response"] = response
 
@@ -196,13 +207,14 @@ def secant(request):
 
             plot_a = approximate_root - 1
             plot_b = approximate_root + 1
-            
-            template_data["plot_data"] = PlotManager.plot_graph(response, function, min(plot_a, plot_b), max(plot_a, plot_b))
+
+            template_data["plot_data"] = PlotManager.plot_graph(
+                response, function, min(plot_a, plot_b), max(plot_a, plot_b)
+            )
 
             return render(request, "non_linear_equations/secant.html", {"template_data": template_data})
 
         else:
-            template_data["response"] = ResponseManager.error_response("All inputs must have a value.")
             return render(request, "non_linear_equations/secant.html", {"template_data": template_data})
 
     except Exception as e:

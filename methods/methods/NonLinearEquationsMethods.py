@@ -7,7 +7,7 @@ from methods.utils.SympyEquationsManager import SympyEquationsManager
 class NonLinearEquationsMethods:
 
     @staticmethod
-    def bisection(a, b, function, tolerance, iterations_limit):
+    def bisection(a, b, function, tolerance, iterations_limit, error_type='relative'):
         """
         Implementation of the bisection method.
 
@@ -257,7 +257,27 @@ class NonLinearEquationsMethods:
             return ResponseManager.warning_response(table, message)
 
     @staticmethod
-    def secant(x0, x1, function, tolerance, iterations_limit):
+    def secant(x0, x1, function, tolerance, iterations_limit, error_type='relative'):
+        """
+        Implementation of the Secant method.
+
+        Parameters:
+        x0 : float
+            Initial approximation of the root.
+        x1 : float
+            Second initial approximation of the root.
+        function : function
+            The function to find the root of.
+        tolerance : float
+            Tolerance that determines when to stop the iteration.
+        iterations_limit : int
+            Maximum number of iterations allowed.
+        error_type : str
+            Type of error to calculate ('relative' or 'absolute').
+
+        Returns:
+        A response dictionary containing the status, message, table, etc.   
+        """
         table = []
         iteration = 0
         error = float('inf')
@@ -270,7 +290,8 @@ class NonLinearEquationsMethods:
 
         table.append([iteration, x0, fx0, "N/A"])
         iteration += 1
-        table.append([iteration, x1, fx1, abs((x1 - x0) / x1)])
+        error = abs((x1 - x0) / x1) if x1 != 0 else float('inf')
+        table.append([iteration, x1, fx1, error])
 
         while iteration < iterations_limit and error > tolerance:
             if fx0 == fx1:
@@ -279,10 +300,11 @@ class NonLinearEquationsMethods:
             x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0)
             fx2 = function(x2)
 
-            if x2 != 0:
-                error = abs((x2 - x1) / x2)
-            else:
-                error = float('inf')
+            # Calculate the error based on the selected error type
+            if error_type == 'relative':
+                error = abs((x2 - x1) / x2) if x2 != 0 else float('inf')
+            else:  # Absolute error
+                error = abs(x2 - x1)
 
             iteration += 1
             table.append([iteration, x2, fx2, error])
@@ -290,13 +312,15 @@ class NonLinearEquationsMethods:
             x0, x1 = x1, x2
             fx0, fx1 = fx1, fx2
 
-            if error < tolerance or fx2 == 0:
+            if error <= tolerance or fx2 == 0:
                 break
 
-        if iteration == iterations_limit:
-            return ResponseManager.warning_response(table)
+        if error <= tolerance or fx2 == 0:
+            message = f"An approximate root is x = {x2} with f(x) = {fx2}"
+            return ResponseManager.success_response(table, message)
         else:
-            return ResponseManager.success_response(table)
+            message = f"The method did not converge after {iterations_limit} iterations."
+            return ResponseManager.warning_response(table, message)
 
     @staticmethod
     def multiple_roots_v1(x0, tol, iterations_limit, multi, function ):
