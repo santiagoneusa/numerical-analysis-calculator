@@ -2,6 +2,7 @@ from django.shortcuts import render
 from methods.utils.ResponseManager import ResponseManager
 from methods.utils.MatricesManager import MatricesManager
 from methods.methods.SystemsEquationsMethods import SystemsEquationsMethods
+from methods.utils.EquationsManager import EquationsManager
 from django.urls import reverse
 
 
@@ -111,29 +112,38 @@ def sor(request):
 
     try:
         if request.method == 'POST':
-            # Obtener las entradas del usuario
+            # Get user inputs
             A_string = request.POST.get('A')
             b_string = request.POST.get('b')
             x0_string = request.POST.get('x0')
-            Tol = float(request.POST.get('tolerance'))
-            niter = int(request.POST.get('iterations_limit'))
-            w = float(request.POST.get('w'))
+            w = float(request.POST.get('w').replace(',', '.'))
+            iterations_limit = int(request.POST.get('iterations_limit'))
+            error_type = request.POST.get('error_type', 'relative')
+            tolerance_input = request.POST.get('tolerance').replace(',', '.')
 
-            # Convertir las entradas en matrices y vectores NumPy
+            # Convert tolerance_input to tolerance value
+            if error_type == 'relative':
+                k = int(tolerance_input)
+                Tol = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                Tol = EquationsManager.correct_decimals_to_tolerance(d)
+
+            # Convert inputs to NumPy arrays
             A = MatricesManager.parse_matrix(A_string)
             b = MatricesManager.parse_vector(b_string)
             x0 = MatricesManager.parse_vector(x0_string)
 
-            # Validar las entradas
+            # Validate inputs
             if not MatricesManager.is_square_matrix(A):
                 raise ValueError("The matrix A must be square.")
             if not MatricesManager.are_dimensions_compatible(A, b, x0):
-                raise ValueError("The dimensions of A, b and x0 are not compatible.")
+                raise ValueError("The dimensions of A, b, and x0 are not compatible.")
             if not (0 < w < 2):
                 raise ValueError("The relaxation factor w must be between 0 and 2.")
 
-            # Llamar al método SOR
-            response = SystemsEquationsMethods.sor(x0, A, b, Tol, niter, w)
+            # Call the SOR method
+            response = SystemsEquationsMethods.sor(x0, A, b, Tol, iterations_limit, w, error_type)
             template_data.update(response)
 
             template_data['table_headers'] = ['Iteration', 'x', 'Error']

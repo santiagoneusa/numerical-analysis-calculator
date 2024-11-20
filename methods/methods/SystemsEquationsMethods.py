@@ -112,7 +112,7 @@ class SystemsEquationsMethods:
         }
 
     @staticmethod
-    def sor(x0, A, b, Tol, niter, w):
+    def sor(x0, A, b, Tol, niter, w, error_type='relative'):
         """
         Method of Successive Over-Relaxation (SOR) for solving systems of linear equations.
 
@@ -123,9 +123,10 @@ class SystemsEquationsMethods:
         Tol : float - Tolerance for convergence.
         niter : int - Maximum number of iterations.
         w : float - Relaxation parameter.
+        error_type : str - Type of error to calculate ('relative' or 'absolute').
         """
         counter = 0
-        error = Tol + 1
+        error = float('inf')
         n = len(A)
         x = x0.copy()
         errors = []
@@ -137,16 +138,26 @@ class SystemsEquationsMethods:
                 sum1 = sum(A[i][j] * x_new[j] for j in range(i))
                 sum2 = sum(A[i][j] * x[j] for j in range(i + 1, n))
                 x_new[i] = (1 - w) * x[i] + (w / A[i][i]) * (b[i] - sum1 - sum2)
-            # Calcular el error relativo
-            relative_error_vector = np.abs((x_new - x) / x_new)
-            error = np.linalg.norm(relative_error_vector, np.inf)
+
+            # Calculate the error based on the selected error type
+            if error_type == 'relative':
+                # Avoid division by zero
+                denominator = np.where(x_new != 0, x_new, np.finfo(float).eps)
+                relative_error_vector = np.abs((x_new - x) / denominator)
+                error = np.linalg.norm(relative_error_vector, np.inf)
+            else:  # Absolute error
+                absolute_error_vector = np.abs(x_new - x)
+                error = np.linalg.norm(absolute_error_vector, np.inf)
+
             errors.append(error)
             counter += 1
             x = x_new.copy()
-            # Añadir datos a la tabla
+            # Add data to the table
             table.append([counter, x.copy(), error])
 
-        if error < Tol:
+            # Optional: Check for divergence (can be implemented if needed)
+
+        if error <= Tol:
             message = f"The method converged in {counter} iterations."
             status = 'success'
         else:
