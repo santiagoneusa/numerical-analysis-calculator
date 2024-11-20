@@ -197,4 +197,128 @@ class InterpolationMethods:
         response['plot_data'] = plot_data
 
         return response
+    
+    @staticmethod
+    def spline_cubic(x_values, y_values):
+        """
+        Interpolation method for cubic splines.
+
+        Parameters:
+        x_values : list[float] - List of x values (known points).
+        y_values : list[float] - List of y values (known results).
+
+        Returns:
+        dict - Dictionary with the table, message, headers, and plot data.
+        """
+        n = len(x_values)
+        if n != len(y_values):
+            raise ValueError("The vectors x and y must have the same length.")
+
+        # Sort the points by x to avoid problems
+        sorted_indices = np.argsort(x_values)
+        x = np.array(x_values)[sorted_indices]
+        y = np.array(y_values)[sorted_indices]
+
+        num_intervals = n - 1
+        num_equations = 4 * num_intervals  # Total number of equations and unknowns
+
+        A = np.zeros((num_equations, num_equations))
+        b = np.zeros(num_equations)
+
+        equation = 0  # Equation counter
+
+        # 1. Interpolation conditions (2(n-1) equations)
+        for i in range(num_intervals):
+            # At x_i: S_i(x_i) = y_i
+            A[equation, 4*i] = x[i]**3      # a_i * x_i^3
+            A[equation, 4*i + 1] = x[i]**2  # b_i * x_i^2
+            A[equation, 4*i + 2] = x[i]     # c_i * x_i
+            A[equation, 4*i + 3] = 1        # d_i
+            b[equation] = y[i]
+            equation += 1
+
+            # At x_{i+1}: S_i(x_{i+1}) = y_{i+1}
+            A[equation, 4*i] = x[i+1]**3
+            A[equation, 4*i + 1] = x[i+1]**2
+            A[equation, 4*i + 2] = x[i+1]
+            A[equation, 4*i + 3] = 1
+            b[equation] = y[i+1]
+            equation += 1
+
+        # 2. First derivative continuity ((n-2) equations)
+        for i in range(1, num_intervals):
+            # S_i'(x_{i}) = S_{i+1}'(x_{i})
+            A[equation, 4*(i-1)] = 3 * x[i]**2     # 3a_{i-1} * x_i^2
+            A[equation, 4*(i-1) + 1] = 2 * x[i]    # 2b_{i-1} * x_i
+            A[equation, 4*(i-1) + 2] = 1           # c_{i-1}
+            # Subtract derivative of S_{i+1} at x_{i}
+            A[equation, 4*i] = -3 * x[i]**2        # -3a_i * x_i^2
+            A[equation, 4*i + 1] = -2 * x[i]       # -2b_i * x_i
+            A[equation, 4*i + 2] = -1              # -c_i
+            b[equation] = 0
+            equation += 1
+
+        # 3. Second derivative continuity ((n-2) equations)
+        for i in range(1, num_intervals):
+            # S_i''(x_{i}) = S_{i+1}''(x_{i})
+            A[equation, 4*(i-1)] = 6 * x[i]      # 6a_{i-1} * x_i
+            A[equation, 4*(i-1) + 1] = 2         # 2b_{i-1}
+            # Subtract second derivative of S_{i+1} at x_{i}
+            A[equation, 4*i] = -6 * x[i]         # -6a_i * x_i
+            A[equation, 4*i + 1] = -2            # -2b_i
+            b[equation] = 0
+            equation += 1
+
+        # 4. Natural spline boundary conditions (2 equations)
+        # At x[0], S_0''(x[0]) = 0
+        A[equation, 0] = 6 * x[0]      # 6a_0 * x_0
+        A[equation, 1] = 2             # 2b_0
+        b[equation] = 0
+        equation += 1
+
+        # At x[n-1], S_{n-2}''(x[n-1]) = 0
+        A[equation, 4*(num_intervals-1)] = 6 * x[-1]     # 6a_{n-2} * x_{n-1}
+        A[equation, 4*(num_intervals-1) + 1] = 2         # 2b_{n-2}
+        b[equation] = 0
+        equation += 1
+
+        # Solve the system
+        coefficients = np.linalg.solve(A, b)
+
+        # Organize the coefficients
+        spline_coefficients = []
+        for i in range(num_intervals):
+            a_i = coefficients[4*i]
+            b_i = coefficients[4*i + 1]
+            c_i = coefficients[4*i + 2]
+            d_i = coefficients[4*i + 3]
+            spline_coefficients.append([a_i, b_i, c_i, d_i])
+
+        # Prepare the table
+        table = []
+        for i in range(num_intervals):
+            interval = f"[{x[i]}, {x[i+1]}]"
+            a_i, b_i, c_i, d_i = spline_coefficients[i]
+            equation_str = f"S_{i}(x) = {a_i}*x^3 + {b_i}*x^2 + {c_i}*x + {d_i}"
+            table.append([interval, a_i, b_i, c_i, d_i, equation_str])
+
+        headers = ['Interval', 'a_i', 'b_i', 'c_i', 'd_i', 'Equation']
+
+        # Prepare the data for plotting
+        plot_data = {
+            'x': x.tolist(),
+            'y': y.tolist(),
+            'coefficients': spline_coefficients
+        }
+
+        response = ResponseManager.success_response(
+            table=table,
+            message="Cubic spline calculation completed successfully.",
+            headers=headers
+        )
+
+        # Add plot_data to the response dictionary
+        response['plot_data'] = plot_data
+
+        return response
 

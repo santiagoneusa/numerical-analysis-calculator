@@ -46,5 +46,17 @@
 
     <h4>Graphic of the Interpolation:</h4>
     <img src="data:image/png;base64,{{ template_data.graphic }}" alt="Graphic of Linear Spline">
+
+    <!-- Download button -->
+    <div class="text-center" style="margin-top: 15px;">
+        <a id="download-button" class="btn btn-primary" href="#" download="linear_spline.png">Download Graph</a>
+    </div>
 {% endif %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var img = document.getElementById('spline-graph');
+        var downloadButton = document.getElementById('download-button');
+        downloadButton.href = img.src;
+    });
+</script>
 {% endblock results_section %}
