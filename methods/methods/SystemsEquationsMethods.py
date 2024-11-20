@@ -21,7 +21,7 @@ class SystemsEquationsMethods:
         return spectral_radius
 
     @staticmethod
-    def jacobi(x0, A, b, Tol, niter):
+    def jacobi(x0, A, b, Tol, niter, error_type='relative'):
         counter = 0
         error = Tol + 1
         n = len(A)
@@ -32,24 +32,38 @@ class SystemsEquationsMethods:
         # Precomputar D, L y U (Jacobi usa sólo D y el resto como un conjunto)
         D = np.diag(np.diag(A))
         R = A - D  # R = L + U, donde L es la parte inferior y U es la superior de la matriz
-
+        spectral_radius = SystemsEquationsMethods.calculate_spectral_radius(R)
+        plot_points = None
+        if n == 2:
+            plot_points = [x.copy()]  # Store the initial guess
+        
+        
         while error > Tol and counter < niter:
             x_new = np.zeros_like(x)  # Inicializar nueva aproximación
             for i in range(n):
                 # Calcular la nueva x[i] considerando todo R
                 sum_R = sum(R[i][j] * x[j] for j in range(n))
                 x_new[i] = (b[i] - sum_R) / A[i][i]
-
-            # Calcular el error relativo
-            relative_error_vector = np.abs((x_new - x) / x_new)
-            error = np.linalg.norm(relative_error_vector, np.inf)
+                
+            # Calculate the error based on the selected error type
+            if error_type == 'relative':
+                # Avoid division by zero
+                denominator = np.where(x_new != 0, x_new, np.finfo(float).eps)
+                relative_error_vector = np.abs((x_new - x) / denominator)
+                error = np.linalg.norm(relative_error_vector, np.inf)
+            else:  # Absolute error
+                absolute_error_vector = np.abs(x_new - x)
+                error = np.linalg.norm(absolute_error_vector, np.inf)
+                
+            
             errors.append(error)
-
             counter += 1
             x = x_new.copy()
-
             # Guardar datos de iteración en la tabla
             table.append([counter, x.copy(), error])
+            
+            if n == 2:
+                plot_points.append(x.copy())
 
         if error < Tol:
             message = f"El método convergió en {counter} iteraciones."
@@ -59,14 +73,24 @@ class SystemsEquationsMethods:
             status = 'warning'
 
         headers = ['Iteración', 'x', 'Error']
-        return {
+        result = {
             'status': status,
             'message': message,
             'table_headers': headers,
             'table': table,
             'solution': x,
             'errors': errors,
+            'spectral_radius': spectral_radius,
         }
+        
+        if n == 2:
+            result['plot_data'] = {
+                'A': A,
+                'b': b,
+                'iterations': plot_points,
+            }
+
+        return result
         
         
     @staticmethod
