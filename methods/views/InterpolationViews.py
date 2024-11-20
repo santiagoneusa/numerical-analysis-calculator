@@ -55,44 +55,90 @@ def newton_divided_difference(request):
 
 def lagrange(request):
     template_data = {}
-    template_data["title"] = "Lagrange method"
-    template_data["breadcrumbs"] = [
-        ("Home", reverse("home")),
-        ("Interpolation", reverse("home") + "#methods-section"),
-        ("Lagrange", reverse("methods.lagrange")),
-    ]
+    template_data["title"] = "Lagrange Interpolation"
 
     try:
-        if request.POST:
-            # TODO: Get the inputs
-            # TODO: Implement Lagrange method
-            # TODO: Implement the response
+        if request.method == 'POST':
+            # Obtener los valores de entrada del formulario
+            x_values = request.POST.get('x_values')
+            y_values = request.POST.get('y_values')
+            x_to_interpolate = float(request.POST.get('x'))
+
+            # Convertir las entradas a listas de números
+            x_values = list(map(float, x_values.strip().split()))
+            y_values = list(map(float, y_values.strip().split()))
+
+            # Validar que los vectores x y y tengan la misma longitud
+            if len(x_values) != len(y_values):
+                raise ValueError("Los vectores x e y deben tener la misma longitud.")
+
+            # Llamar al método de interpolación de Lagrange
+            response = InterpolationMethods.lagrange(x_values, y_values, x_to_interpolate)
+
+            # Generar el gráfico (si es necesario)
+            graphic = PlotManager.plot_lagrange(
+                x=response['plot_data']['x'],
+                y=response['plot_data']['y']
+            )
+
+            # Agregar el gráfico a los datos de la plantilla
+            response['graphic'] = graphic
+
+            # Añadir la respuesta de la interpolación y el gráfico a los datos de la plantilla
+            template_data.update(response)
+        
+
+            # Renderizar la plantilla con los datos generados
             return render(request, "interpolation/lagrange.html", {"template_data": template_data})
+
         else:
-            template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
+            # Si es un GET, solo renderizamos la plantilla vacía
             return render(request, "interpolation/lagrange.html", {"template_data": template_data})
 
     except Exception as e:
-        template_data = ResponseManager.error_response(e)
+        # Si hay un error, capturarlo y renderizarlo en la plantilla
+        template_data = ResponseManager.error_response(str(e))
+        template_data["title"] = "Lagrange Interpolation"
         return render(request, "interpolation/lagrange.html", {"template_data": template_data})
 
 
 def spline_linear(request):
     template_data = {}
     template_data["title"] = "Linear Spline Interpolation"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Interpolation", reverse("home") + "#methods-section"),
+        ("Linear Spline", reverse("methods.spline_linear")),
+    ]
 
-    try:
-        if request.method == 'POST':
-            x_values = request.POST.get('x_values')
-            y_values = request.POST.get('y_values')
+    if request.method == 'POST':
+        x_values_input = request.POST.get('x_values', '')
+        y_values_input = request.POST.get('y_values', '')
+
+        try:
+            # Validate that inputs are not empty
+            if not x_values_input.strip() or not y_values_input.strip():
+                raise ValueError("Both x values and y values must be provided.")
+
+            # Replace commas with spaces and split the inputs
+            x_values_str_list = x_values_input.replace(',', ' ').split()
+            y_values_str_list = y_values_input.replace(',', ' ').split()
 
             # Convert the inputs to lists of numbers
-            x_values = list(map(float, x_values.strip().split()))
-            y_values = list(map(float, y_values.strip().split()))
+            x_values = [float(x) for x in x_values_str_list]
+            y_values = [float(y) for y in y_values_str_list]
 
             # Validate that they have the same length
             if len(x_values) != len(y_values):
                 raise ValueError("The vectors x and y must have the same length.")
+
+            # Validate that x_values are in ascending order
+            if x_values != sorted(x_values):
+                raise ValueError("The x values must be in ascending order.")
+
+            # Validate that x_values are distinct
+            if len(set(x_values)) != len(x_values):
+                raise ValueError("The x values must be distinct (no duplicates).")
 
             # Call the linear spline method
             response = InterpolationMethods.spline_linear(x_values, y_values)
@@ -110,10 +156,153 @@ def spline_linear(request):
             template_data.update(response)
             return render(request, "interpolation/spline_linear.html", {"template_data": template_data})
 
-        else:
+        except ValueError as ve:
+            # Handle specific value errors
+            template_data = ResponseManager.error_response(str(ve))
+            template_data["title"] = "Linear Spline Interpolation"
+            return render(request, "interpolation/spline_linear.html", {"template_data": template_data})
+        except Exception as e:
+            # Handle any other exceptions
+            template_data = ResponseManager.error_response("An unexpected error occurred: " + str(e))
+            template_data["title"] = "Linear Spline Interpolation"
             return render(request, "interpolation/spline_linear.html", {"template_data": template_data})
 
-    except Exception as e:
-        template_data = ResponseManager.error_response(str(e))
-        template_data["title"] = "Linear Spline Interpolation"
+    else:
         return render(request, "interpolation/spline_linear.html", {"template_data": template_data})
+
+
+def spline_quadratic(request):
+    template_data = {}
+    template_data["title"] = "Quadratic Spline Interpolation"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Interpolation", reverse("home") + "#methods-section"),
+        ("Quadratic Spline", reverse("methods.spline_quadratic")),
+    ]
+
+    if request.method == 'POST':
+        x_values_input = request.POST.get('x_values', '')
+        y_values_input = request.POST.get('y_values', '')
+
+        try:
+            # Validate that inputs are not empty
+            if not x_values_input.strip() or not y_values_input.strip():
+                raise ValueError("Both x values and y values must be provided.")
+
+            # Replace commas with spaces and split the inputs
+            x_values_str_list = x_values_input.replace(',', ' ').split()
+            y_values_str_list = y_values_input.replace(',', ' ').split()
+
+            # Convert the inputs to lists of numbers
+            x_values = [float(x) for x in x_values_str_list]
+            y_values = [float(y) for y in y_values_str_list]
+
+            # Validate that they have the same length
+            if len(x_values) != len(y_values):
+                raise ValueError("The vectors x and y must have the same length.")
+
+            # Validate that x_values are in ascending order
+            if x_values != sorted(x_values):
+                raise ValueError("The x values must be in ascending order.")
+
+            # Validate that x_values are distinct
+            if len(set(x_values)) != len(x_values):
+                raise ValueError("The x values must be distinct (no duplicates).")
+
+            # Call the quadratic spline method
+            response = InterpolationMethods.spline_quadratic(x_values, y_values)
+
+            # Generate the graphic
+            graphic = PlotManager.plot_quadratic_spline(
+                x=response['plot_data']['x'],
+                y=response['plot_data']['y'],
+                coefficients=response['plot_data']['coefficients']
+            )
+
+            # Add the graphic to the response
+            response['graphic'] = graphic
+
+            template_data.update(response)
+            return render(request, "interpolation/spline_quadratic.html", {"template_data": template_data})
+
+        except ValueError as ve:
+            # Handle specific value errors
+            template_data = ResponseManager.error_response(str(ve))
+            template_data["title"] = "Quadratic Spline Interpolation"
+            return render(request, "interpolation/spline_quadratic.html", {"template_data": template_data})
+        except Exception as e:
+            # Handle any other exceptions
+            template_data = ResponseManager.error_response("An unexpected error occurred: " + str(e))
+            template_data["title"] = "Quadratic Spline Interpolation"
+            return render(request, "interpolation/spline_quadratic.html", {"template_data": template_data})
+
+    else:
+        return render(request, "interpolation/spline_quadratic.html", {"template_data": template_data})
+
+def spline_cubic(request):
+    template_data = {}
+    template_data["title"] = "Cubic Spline Interpolation"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Interpolation", reverse("home") + "#methods-section"),
+        ("Cubic Spline", reverse("methods.spline_cubic")),
+    ]
+
+    if request.method == 'POST':
+        x_values_input = request.POST.get('x_values', '')
+        y_values_input = request.POST.get('y_values', '')
+
+        try:
+            # Validate that inputs are not empty
+            if not x_values_input.strip() or not y_values_input.strip():
+                raise ValueError("Both x values and y values must be provided.")
+
+            # Replace commas with spaces and split the inputs
+            x_values_str_list = x_values_input.replace(',', ' ').split()
+            y_values_str_list = y_values_input.replace(',', ' ').split()
+
+            # Convert the inputs to lists of numbers
+            x_values = [float(x) for x in x_values_str_list]
+            y_values = [float(y) for y in y_values_str_list]
+
+            # Validate that they have the same length
+            if len(x_values) != len(y_values):
+                raise ValueError("The vectors x and y must have the same length.")
+
+            # Validate that x_values are in ascending order
+            if x_values != sorted(x_values):
+                raise ValueError("The x values must be in ascending order.")
+
+            # Validate that x_values are distinct
+            if len(set(x_values)) != len(x_values):
+                raise ValueError("The x values must be distinct (no duplicates).")
+
+            # Call the cubic spline method
+            response = InterpolationMethods.spline_cubic(x_values, y_values)
+
+            # Generate the graphic
+            graphic = PlotManager.plot_cubic_spline(
+                x=response['plot_data']['x'],
+                y=response['plot_data']['y'],
+                coefficients=response['plot_data']['coefficients']
+            )
+
+            # Add the graphic to the response
+            response['graphic'] = graphic
+
+            template_data.update(response)
+            return render(request, "interpolation/spline_cubic.html", {"template_data": template_data})
+
+        except ValueError as ve:
+            # Handle specific value errors
+            template_data = ResponseManager.error_response(str(ve))
+            template_data["title"] = "Cubic Spline Interpolation"
+            return render(request, "interpolation/spline_cubic.html", {"template_data": template_data})
+        except Exception as e:
+            # Handle any other exceptions
+            template_data = ResponseManager.error_response("An unexpected error occurred: " + str(e))
+            template_data["title"] = "Cubic Spline Interpolation"
+            return render(request, "interpolation/spline_cubic.html", {"template_data": template_data})
+
+    else:
+        return render(request, "interpolation/spline_cubic.html", {"template_data": template_data})

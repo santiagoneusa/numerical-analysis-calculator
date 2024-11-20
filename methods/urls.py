@@ -18,4 +18,6 @@ urlpatterns = [
     path("newton-divided-difference", InterpolationViews.newton_divided_difference, name="methods.newton_divided_difference"),
     path("lagrange", InterpolationViews.lagrange, name="methods.lagrange"),
     path("spline-linear", InterpolationViews.spline_linear, name="methods.spline_linear"),
+    path("spline-quadratic", InterpolationViews.spline_quadratic, name="methods.spline_quadratic"),
+    path("spline-cubic", InterpolationViews.spline_cubic, name="methods.spline_cubic"),
 ]
