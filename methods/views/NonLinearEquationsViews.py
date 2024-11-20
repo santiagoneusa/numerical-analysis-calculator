@@ -51,11 +51,88 @@ def bisection(request):
 
 
 def fixed_point(request):
-    pass
+    template_data = {}
+    template_data["title"] = "Fixed Point Method"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Non Linear Equations", reverse("home") + "#methods-section"),
+        ("Fixed Point", reverse("methods.fixed_point")),
+    ]
+
+    try:
+        if request.POST:
+            g_function_str = request.POST.get("g_function")
+            initial_guess = float(request.POST.get("initial_guess"))
+            tolerance = float(request.POST.get("tolerance"))
+            iterations_limit = int(request.POST.get("iterations_limit"))
+
+            # Parseamos la función g(x)
+            g_function = EquationsManager.parse_function(g_function_str)
+
+            # Ejecutamos el método de punto fijo
+            response = NonLinearEquationsMethods.fixed_point(
+                g_function, initial_guess, tolerance, iterations_limit
+            )
+
+            template_data["response"] = response
+
+            # Preparar datos para la gráfica
+            approximate_root = response["table"][-1][1]
+            plot_a = approximate_root - 1
+            plot_b = approximate_root + 1
+            template_data["plot_data"] = PlotManager.plot_graph(response, g_function, plot_a, plot_b)
+
+            return render(request, "non_linear_equations/fixed_point.html", {"template_data": template_data})
+        else:
+            template_data["response"] = ResponseManager.error_response("All inputs must have a value.")
+            return render(request, "non_linear_equations/fixed_point.html", {"template_data": template_data})
+    except Exception as e:
+        template_data["response"] = ResponseManager.error_response(str(e))
+        return render(request, "non_linear_equations/fixed_point.html", {"template_data": template_data})
 
 
 def false_position(request):
-    pass
+    template_data = {}
+    template_data["title"] = "False Position Method"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Non Linear Equations", reverse("home") + "#methods-section"),
+        ("False Position", reverse("methods.false_position")),
+    ]
+
+    try:
+        if request.POST:
+            # Obtener datos del formulario
+            a = float(request.POST.get("a"))
+            b = float(request.POST.get("b"))
+            function_str = request.POST.get("function")
+            tolerance = float(request.POST.get("tolerance"))
+            iterations_limit = int(request.POST.get("iterations_limit"))
+
+            # Parsear la función
+            function = EquationsManager.parse_function(function_str)
+
+            # Ejecutar el método de falsa posición
+            response = NonLinearEquationsMethods.false_position(
+                a, b, function, tolerance, iterations_limit
+            )
+
+            template_data["response"] = response
+
+            # Preparar datos para la gráfica
+            approximate_root = response["table"][-1][3]  # 'c' está en la columna 3
+            plot_a = approximate_root - 1
+            plot_b = approximate_root + 1
+            template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
+
+            return render(request, "non_linear_equations/false_position.html", {"template_data": template_data})
+        else:
+            template_data["response"] = ResponseManager.error_response("All inputs must have a value.")
+            return render(request, "non_linear_equations/false_position.html", {"template_data": template_data})
+    except Exception as e:
+        template_data["response"] = ResponseManager.error_response(str(e))
+        return render(request, "non_linear_equations/false_position.html", {"template_data": template_data})
+
 
 
 def newton_raphson(request):
