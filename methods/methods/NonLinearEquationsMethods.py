@@ -201,9 +201,10 @@ class NonLinearEquationsMethods:
 
         x = sp.symbols('x')
 
-        # Parsear la función y calcular su derivada
+        # Parse the function and its derivative
         try:
-            f_sym, f_num = SympyEquationsManager.parse_function(function_text)
+            f_sym = sp.sympify(function_text.replace('^', '**'))
+            f_num = sp.lambdify(x, f_sym, modules=['numpy'])
             df_sym = sp.diff(f_sym, x)
             df_num = sp.lambdify(x, df_sym, modules=['numpy'])
         except Exception as e:
@@ -240,10 +241,10 @@ class NonLinearEquationsMethods:
             else:
                 error = float('inf')
 
-            # Agregar datos a la tabla
-            table.append([iterations, x_i, f_x_i, df_x_i, error])
+            # Add data to the table
+            table.append([iterations, x_i, f_x_i, error])
 
-            # Preparar para la siguiente iteración
+            # Prepare for the next iteration
             prev_x_i = x_i
             x_i = new_x_i
             iterations += 1
@@ -255,7 +256,7 @@ class NonLinearEquationsMethods:
         else:
             message = f"The method did not converge after {iterations_limit} iterations."
             return ResponseManager.warning_response(table, message)
-
+        
     @staticmethod
     def secant(x0, x1, function, tolerance, iterations_limit, error_type='relative'):
         """

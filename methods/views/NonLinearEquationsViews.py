@@ -144,15 +144,25 @@ def newton_raphson(request):
     ]
 
     try:
-        if request.POST:
+        if request.method == 'POST':
             function_str = request.POST.get("function")
             function = EquationsManager.parse_function(function_str)
-            x0 = float(request.POST.get("x0"))
-            tol = float(request.POST.get("tolerance"))
+            x0 = float(request.POST.get("x0").replace(',', '.'))
             iterations_limit = int(request.POST.get("iterations_limit"))
             error_type = request.POST.get("error_type", "relative")
+            tolerance_input = request.POST.get("tolerance").replace(',', '.')
 
-            response = NonLinearEquationsMethods.newton_raphson(function_str, x0, tol, iterations_limit, error_type)
+            # Convert tolerance_input to tolerance value
+            if error_type == 'relative':
+                k = int(tolerance_input)
+                tol = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                tol = EquationsManager.correct_decimals_to_tolerance(d)
+
+            response = NonLinearEquationsMethods.newton_raphson(
+                function_str, x0, tol, iterations_limit, error_type
+            )
             template_data["response"] = response
 
             approximate_root = response["table"][-1][1]
@@ -167,7 +177,7 @@ def newton_raphson(request):
 
     except Exception as e:
         template_data = ResponseManager.error_response(str(e))
-        template_data["title"] = "Método de Newton-Raphson"
+        template_data["title"] = "Newton-Raphson Method"
         return render(request, 'non_linear_equations/newton_raphson.html', {'template_data': template_data})
 
 def secant(request):
