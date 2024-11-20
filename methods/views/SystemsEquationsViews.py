@@ -52,25 +52,51 @@ def jacobi(request):
 
 def gauss_seidel(request):
     template_data = {}
-    template_data["title"] = "Gauss-Seidel method"
+    template_data["title"] = "Gauss-Seidel Method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
-        ("Systems of equations", reverse("home") + "#methods-section"),
+        ("Equations systems", reverse("methods.gauss_seidel")),
         ("Gauss-Seidel", reverse("methods.gauss_seidel")),
     ]
 
     try:
-        if request.POST:
-            # TODO: Get the inputs
-            # TODO: Implement Gauss-Seidel method
-            # TODO: Implement the response
+        if request.method == 'POST':
+            # Obtener las entradas del usuario
+            A_string = request.POST.get('A')
+            b_string = request.POST.get('b')
+            x0_string = request.POST.get('x0')
+            Tol = float(request.POST.get('tolerance'))
+            niter = int(request.POST.get('iterations_limit'))
+
+            # Convertir las entradas en matrices y vectores NumPy
+            A = MatricesManager.parse_matrix(A_string)
+            b = MatricesManager.parse_vector(b_string)
+            x0 = MatricesManager.parse_vector(x0_string)
+
+            # Validar las entradas
+            if not MatricesManager.is_square_matrix(A):
+                raise ValueError("The matrix A must be square.")
+            if not MatricesManager.are_dimensions_compatible(A, b, x0):
+                raise ValueError("The dimensions of A, b, and x0 are not compatible.")
+
+            # Llamar al método Gauss-Seidel
+            response = SystemsEquationsMethods.gauss_seidel(A, b, x0, Tol, niter)
+            template_data.update(response)
+
+            # Añadir los encabezados para la tabla
+            template_data['table_headers'] = ['Iteration', 'x', 'Error']
+
+            # Renderizar la página con los resultados
             return render(request, "systems_equations/gauss_seidel.html", {"template_data": template_data})
+
         else:
-            template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
+            # Si el método es GET, solo renderiza el formulario vacío
             return render(request, "systems_equations/gauss_seidel.html", {"template_data": template_data})
 
     except Exception as e:
-        template_data = ResponseManager.error_response(e)
+        # Si ocurre un error, manejarlo y mostrar el mensaje en la vista
+        template_data = ResponseManager.error_response(str(e))
+        template_data["title"] = "Gauss-Seidel Method"
         return render(request, "systems_equations/gauss_seidel.html", {"template_data": template_data})
 
 
