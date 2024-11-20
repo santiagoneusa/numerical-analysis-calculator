@@ -50,15 +50,18 @@ def vandermonde(request):
 
             print("Template data:", template_data)  # Debugging line
 
-            return render(request, "interpolation/vandermonde.html", {"template_data": template_data})
+            return render(request, "interpolation/vandermonde.html", template_data)
+
 
         else:
             template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
-            return render(request, "interpolation/vandermonde.html", {"template_data": template_data})
+            return render(request, "interpolation/vandermonde.html", template_data)
+
 
     except Exception as e:
         template_data = ResponseManager.error_response(str(e))
-        return render(request, "interpolation/vandermonde.html", {"template_data": template_data})
+        return render(request, "interpolation/vandermonde.html", template_data)
+
 
 
 def newton_divided_difference(request):
