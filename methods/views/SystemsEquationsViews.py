@@ -97,5 +97,4 @@ def sor(request):
 
     except Exception as e:
         template_data = ResponseManager.error_response(str(e))
-        template_data["title"] = "Method of Successive Over-Relaxation (SOR)"
         return render(request, "systems_equations/sor.html", {"template_data": template_data})
