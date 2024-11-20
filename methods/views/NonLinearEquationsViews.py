@@ -85,7 +85,6 @@ def newton_raphson(request):
             plot_b = approximate_root + 1
 
             template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
-            print(f"Plot data: {template_data['plot_data']}")
 
             return render(request, 'non_linear_equations/newton_raphson.html', {'template_data': template_data})
         else:
