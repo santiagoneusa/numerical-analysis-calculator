@@ -92,6 +92,10 @@
     </table>
 {% endif %}
 
+{% if template_data.spectral_radius %}
+    <p>Spectral Radius: {{ template_data.spectral_radius }}</p>
+{% endif %}
+
 <!-- Display the plot if available -->
 {% if template_data.plot_html %}
     <h3>Graphical Representation:</h3>

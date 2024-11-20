@@ -4,6 +4,23 @@ from methods.utils.ResponseManager import ResponseManager
 class SystemsEquationsMethods:
 
     @staticmethod
+    def calculate_spectral_radius(A):
+        """
+        Calculates the spectral radius of the matrix A.
+
+        Parameters:
+        A : numpy.ndarray
+            The matrix for which the spectral radius is calculated.
+
+        Returns:
+        float
+            The spectral radius (maximum of the absolute eigenvalues of A).
+        """
+        eigenvalues = np.linalg.eigvals(A)
+        spectral_radius = max(abs(eigenvalues))
+        return spectral_radius
+
+    @staticmethod
     def jacobi(x0, A, b, Tol, niter, error_type='relative'):
         counter = 0
         error = Tol + 1
@@ -15,7 +32,7 @@ class SystemsEquationsMethods:
         # Precomputar D, L y U (Jacobi usa sólo D y el resto como un conjunto)
         D = np.diag(np.diag(A))
         R = A - D  # R = L + U, donde L es la parte inferior y U es la superior de la matriz
-
+        spectral_radius = SystemsEquationsMethods.calculate_spectral_radius(R)
         plot_points = None
         if n == 2:
             plot_points = [x.copy()]  # Store the initial guess
@@ -63,6 +80,7 @@ class SystemsEquationsMethods:
             'table': table,
             'solution': x,
             'errors': errors,
+            'spectral_radius': spectral_radius,
         }
         
         if n == 2:
@@ -97,6 +115,8 @@ class SystemsEquationsMethods:
         x = np.array(x0, dtype=float)  # Convertir x0 a un array de numpy para manipulación
         errors = []
         table = []
+
+        spectral_radius = SystemsEquationsMethods.calculate_spectral_radius(A)
 
         # Para graficar las matrices 2x2
         plot_data = None
@@ -147,6 +167,7 @@ class SystemsEquationsMethods:
             'table': table,
             'solution': x,
             'errors': errors,
+            'spectral_radius': spectral_radius,
         }
 
         # If A is 2x2, prepare plot data
@@ -182,6 +203,8 @@ class SystemsEquationsMethods:
         x = x0.copy()
         errors = []
         table = []
+
+        spectral_radius = SystemsEquationsMethods.calculate_spectral_radius(A)
 
         # For plotting purposes if A is 2x2
         plot_data = None
@@ -231,6 +254,7 @@ class SystemsEquationsMethods:
             'table': table,
             'solution': x,
             'errors': errors,
+            'spectral_radius': spectral_radius,
         }
 
         # If A is 2x2, prepare plot data
