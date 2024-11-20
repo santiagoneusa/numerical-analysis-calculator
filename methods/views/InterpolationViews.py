@@ -117,3 +117,50 @@ def spline_linear(request):
         template_data = ResponseManager.error_response(str(e))
         template_data["title"] = "Linear Spline Interpolation"
         return render(request, "interpolation/spline_linear.html", {"template_data": template_data})
+
+
+def spline_quadratic(request):
+    template_data = {}
+    template_data["title"] = "Quadratic Spline Interpolation"
+    template_data["breadcrumbs"] = [
+        ("Home", reverse("home")),
+        ("Interpolation", reverse("home") + "#methods-section"),
+        ("Quadratic Spline", reverse("methods.spline_quadratic")),
+    ]
+
+    try:
+        if request.method == 'POST':
+            x_values = request.POST.get('x_values')
+            y_values = request.POST.get('y_values')
+
+            # Convert the inputs to lists of numbers
+            x_values = list(map(float, x_values.strip().split()))
+            y_values = list(map(float, y_values.strip().split()))
+
+            # Validate that they have the same length
+            if len(x_values) != len(y_values):
+                raise ValueError("The vectors x and y must have the same length.")
+
+            # Call the quadratic spline method
+            response = InterpolationMethods.spline_quadratic(x_values, y_values)
+
+            # Generate the graphic
+            graphic = PlotManager.plot_quadratic_spline(
+                x=response['plot_data']['x'],
+                y=response['plot_data']['y'],
+                coefficients=response['plot_data']['coefficients']
+            )
+
+            # Add the graphic to the response
+            response['graphic'] = graphic
+
+            template_data.update(response)
+            return render(request, "interpolation/spline_quadratic.html", {"template_data": template_data})
+
+        else:
+            return render(request, "interpolation/spline_quadratic.html", {"template_data": template_data})
+
+    except Exception as e:
+        template_data = ResponseManager.error_response(str(e))
+        template_data["title"] = "Quadratic Spline Interpolation"
+        return render(request, "interpolation/spline_quadratic.html", {"template_data": template_data})
