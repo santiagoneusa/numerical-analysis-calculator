@@ -10,56 +10,102 @@ class NonLinearEquationsMethods:
     @staticmethod
     def bisection(a, b, function, tolerance, iterations_limit, error_type='relative'):
         """
-        Implementation of the bisection method.
+        Implementation of the Bisection Method with error type selector.
 
         Parameters:
         a : float
             Left endpoint of the interval.
         b : float
             Right endpoint of the interval.
-        function : function
+        function : callable
             The function to find the root of.
         tolerance : float
             Tolerance that determines when to stop the iteration.
         iterations_limit : int
             Maximum number of iterations allowed.
+        error_type : str
+            Type of error to calculate ('relative' or 'absolute').
 
         Returns:
         A response dictionary containing the status, message, table, etc.
         """
-        if function(a) * function(b) >= 0:
-            raise ValueError("The function must have opposite signs at f(a) and f(b)")
 
-        if function(a) == 0:
-            table = [[0, a, function(a), 0]]
-            return ResponseManager.success_response(table)
+        # Input validation
+        if not EquationsManager.is_valid_number(a):
+            return ResponseManager.error_response("Left endpoint a must be a valid number.")
 
-        if function(b) == 0:
-            table = [[0, b, function(b), 0]]
-            return ResponseManager.success_response(table)
+        if not EquationsManager.is_valid_number(b):
+            return ResponseManager.error_response("Right endpoint b must be a valid number.")
 
-        iteration = 1
-        error = 100
-        table = [[0, a, function(a), error]]
-        while (iteration < iterations_limit) and (tolerance <= error):
-            c = (a + b) / 2
-            fc = function(c)
-            error = abs(fc - table[iteration - 1][2])
-            table.append([iteration, c, fc, error])
+        if not EquationsManager.is_valid_number(tolerance) or tolerance <= 0:
+            return ResponseManager.error_response("Tolerance must be a positive number.")
 
-            if fc == 0:
-                break
+        if not isinstance(iterations_limit, int) or iterations_limit <= 0:
+            return ResponseManager.error_response("Iterations limit must be a positive integer.")
 
-            if function(a) * fc >= 0:
-                a = c
+        if error_type not in ('relative', 'absolute'):
+            return ResponseManager.error_response("Error type must be 'relative' or 'absolute'.")
+
+        try:
+            fa = function(a)
+            fb = function(b)
+        except Exception as e:
+            return ResponseManager.error_response(f"Error evaluating the function at endpoints: {e}")
+
+        if fa * fb > 0:
+            return ResponseManager.error_response("The function must have opposite signs at a and b.")
+
+        table = []
+        iteration = 0
+        error = float('inf')
+        c = a  # Initial approximation
+        fc = fa
+
+        headers = ['Iteration', 'a', 'b', 'c', 'f(c)', 'Error']
+
+        # Start iterations
+        while error > tolerance and iteration < iterations_limit:
+            c_prev = c  # Store previous c
+            c = (a + b) / 2.0
+            try:
+                fc = function(c)
+            except Exception as e:
+                return ResponseManager.error_response(f"Error evaluating the function at c = {c}: {e}")
+
+            # Calculate the error
+            if iteration == 0:
+                error = float('inf')  # No error in the first iteration
             else:
+                if error_type == 'relative':
+                    if c != 0:
+                        error = abs((c - c_prev) / c)
+                    else:
+                        error = float('inf')
+                else:  # Absolute error
+                    error = abs(c - c_prev)
+
+            # Append data to the table
+            table.append([iteration, a, b, c, fc, error])
+
+            # Check for convergence
+            if abs(fc) <= tolerance or error <= tolerance:
+                message = f"An approximate root is c = {c} with f(c) = {fc}"
+                return ResponseManager.success_response(table, message, headers)
+
+            # Decide the side to repeat the steps
+            if fa * fc < 0:
                 b = c
+                fb = fc
+            else:
+                a = c
+                fa = fc
+
             iteration += 1
 
-        if iteration == iterations_limit:
-            return ResponseManager.warning_response(table)
-        else:
-            return ResponseManager.success_response(table)
+        # If the method did not converge within the iteration limit
+        message = f"The method did not converge after {iterations_limit} iterations."
+        return ResponseManager.warning_response(table, message, headers)
+
 
     @staticmethod
     def fixed_point(g_function, initial_guess, tolerance, iterations_limit, error_type='relative'):

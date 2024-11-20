@@ -7,7 +7,7 @@ from django.urls import reverse
 
 def bisection(request):
     template_data = {}
-    template_data["title"] = "Bisection method"
+    template_data["title"] = "Bisection Method"
     template_data["breadcrumbs"] = [
         ("Home", reverse("home")),
         ("Non Linear Equations", reverse("home") + "#methods-section"),
@@ -15,39 +15,42 @@ def bisection(request):
     ]
 
     try:
-        if request.POST:
-            a = float(request.POST.get("a").replace(',', '.'))
-            b = float(request.POST.get("b").replace(',', '.'))
+        if request.method == 'POST':
             function_str = request.POST.get("function")
             function = EquationsManager.parse_function(function_str)
-            tolerance = float(request.POST.get("correct_decimals").replace(',', '.'))
+            a = float(request.POST.get("a").replace(',', '.'))
+            b = float(request.POST.get("b").replace(',', '.'))
             iterations_limit = int(request.POST.get("iterations_limit"))
+            error_type = request.POST.get("error_type", "relative")
+            tolerance_input = request.POST.get("tolerance").replace(',', '.')
 
-            response = NonLinearEquationsMethods.bisection(a, b, function, tolerance, iterations_limit)
+            # Convert tolerance_input to tolerance value
+            if error_type == 'relative':
+                k = int(tolerance_input)
+                tolerance = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                tolerance = EquationsManager.correct_decimals_to_tolerance(d)
+
+            response = NonLinearEquationsMethods.bisection(a, b, function, tolerance, iterations_limit, error_type)
             template_data["response"] = response
 
-            # Obtener la solución aproximada de la respuesta
-            approximate_root = response["table"][-1][1]  # Suponiendo que la columna 1 es 'c'
+            if response["status"] == "success":
+                approximate_root = response["table"][-1][3]  # c value
+                plot_a = a
+                plot_b = b
 
-            # Calcular los nuevos límites para la gráfica
-            plot_a = approximate_root - 1
-            plot_b = approximate_root + 1
+                template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
 
-            # Verificar que plot_a < plot_b
-            if plot_a > plot_b:
-                plot_a, plot_b = plot_b, plot_a  # Intercambiar si es necesario
-
-            template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
-
-            return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
-
+            return render(request, 'non_linear_equations/bisection.html', {'template_data': template_data})
         else:
-            template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
-            return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
+            return render(request, 'non_linear_equations/bisection.html', {'template_data': template_data})
 
     except Exception as e:
         template_data = ResponseManager.error_response(str(e))
-        return render(request, "non_linear_equations/bisection.html", {"template_data": template_data})
+        template_data["title"] = "Bisection Method"
+        return render(request, 'non_linear_equations/bisection.html', {'template_data': template_data})
+
 
 
 def fixed_point(request):

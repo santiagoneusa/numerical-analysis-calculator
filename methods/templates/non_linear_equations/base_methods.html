@@ -37,12 +37,20 @@
                 <h3>Table</h3>
                 <table class="table">
                     <thead>
+                        {% if template_data.response.table_headers %}
+                        <tr>
+                            {% for header in template_data.response.table_headers %}
+                            <th>{{ header }}</th>
+                            {% endfor %}
+                        </tr>
+                        {% else %}
                         <tr>
                             <th>Iteration</th>
                             <th>xi</th>
                             <th>f(xi)</th>
-                            <th>Absolute Error</th>
+                            <th>Error</th>
                         </tr>
+                        {% endif %}
                     </thead>
                     <tbody>
                         {% for row in template_data.response.table %}
