@@ -86,3 +86,36 @@ class PlotManager:
         graphic = graphic.decode('utf-8')
 
         return graphic
+    
+    @staticmethod
+    def plot_cubic_spline(x, y, coefficients):
+        fig, ax = plt.subplots()
+
+        # Plot the original points
+        ax.plot(x, y, 'o', label='Given points')
+
+        # Plot each cubic segment
+        for i in range(len(coefficients)):
+            a_i, b_i, c_i, d_i = coefficients[i]
+            x_interval = np.linspace(x[i], x[i+1], 100)
+            y_interval = a_i * x_interval**3 + b_i * x_interval**2 + c_i * x_interval + d_i
+            ax.plot(x_interval, y_interval, label=f'Segment {i+1}')
+
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_title('Cubic Spline Interpolation')
+        ax.legend()
+
+        # Save the figure to a buffer
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image_png = buf.getvalue()
+        buf.close()
+        plt.close(fig)
+
+        # Encode the image to base64 to insert it into HTML
+        graphic = base64.b64encode(image_png)
+        graphic = graphic.decode('utf-8')
+
+        return graphic
