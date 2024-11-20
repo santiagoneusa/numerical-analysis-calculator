@@ -3,6 +3,7 @@ from methods.utils.ResponseManager import ResponseManager
 from methods.utils.MatricesManager import MatricesManager
 from methods.methods.SystemsEquationsMethods import SystemsEquationsMethods
 from methods.utils.EquationsManager import EquationsManager
+from methods.utils.PlotManager import PlotManager
 from django.urls import reverse
 
 
@@ -66,8 +67,17 @@ def gauss_seidel(request):
             A_string = request.POST.get('A')
             b_string = request.POST.get('b')
             x0_string = request.POST.get('x0')
-            Tol = float(request.POST.get('tolerance'))
+            error_type = request.POST.get('error_type', "relative")
+            tolerance_input = request.POST.get('tolerance').replace(',', '.')
             niter = int(request.POST.get('iterations_limit'))
+
+            # Convertir tolerance_input a un valor de tolerancia
+            if error_type == 'relative':
+                k = int(tolerance_input)
+                Tol = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                Tol = EquationsManager.correct_decimals_to_tolerance(d)
 
             # Convertir las entradas en matrices y vectores NumPy
             A = MatricesManager.parse_matrix(A_string)
@@ -81,7 +91,7 @@ def gauss_seidel(request):
                 raise ValueError("The dimensions of A, b, and x0 are not compatible.")
 
             # Llamar al método Gauss-Seidel
-            response = SystemsEquationsMethods.gauss_seidel(A, b, x0, Tol, niter)
+            response = SystemsEquationsMethods.gauss_seidel(A, b, x0, Tol, niter,error_type)
             template_data.update(response)
 
             # Añadir los encabezados para la tabla
@@ -118,7 +128,7 @@ def sor(request):
             x0_string = request.POST.get('x0')
             w = float(request.POST.get('w').replace(',', '.'))
             iterations_limit = int(request.POST.get('iterations_limit'))
-            error_type = request.POST.get('error_type', 'relative')
+            error_type = request.POST.get('error_type', "relative")
             tolerance_input = request.POST.get('tolerance').replace(',', '.')
 
             # Convert tolerance_input to tolerance value
@@ -147,6 +157,12 @@ def sor(request):
             template_data.update(response)
 
             template_data['table_headers'] = ['Iteration', 'x', 'Error']
+
+            # If plot data is available, generate the plot
+            if 'plot_data' in response:
+                plot_html = PlotManager.plot_sor_iterations(response['plot_data'])
+                template_data['plot_html'] = plot_html
+
             return render(request, "systems_equations/sor.html", {"template_data": template_data})
 
         else:

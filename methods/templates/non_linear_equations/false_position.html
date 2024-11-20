@@ -24,8 +24,18 @@
 
     <div class="row g-3 align-items-center">
         <div class="mb-3">
-            <label for="tolerance" class="form-label">Tolerance</label>
-            <input type="text" class="form-control" id="tolerance" name="tolerance" placeholder="Example: 0.05" required>
+            <label for="error_type" class="form-label">Error type</label>
+            <select class="form-select" id="error_type" name="error_type" required>
+                <option value="relative">Relative</option>
+                <option value="absolute">Absolute</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-center">
+        <div class="mb-3">
+            <label for="tolerance" class="form-label">Tolerance input</label>
+            <input type="text" class="form-control" id="tolerance" name="tolerance" placeholder="Significant figures (k) or decimal places (d)" required>
         </div>
     </div>
 
