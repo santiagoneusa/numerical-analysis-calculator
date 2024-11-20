@@ -8,47 +8,63 @@ class SystemsEquationsMethods:
         pass
 
     @staticmethod
-    def gauss_seidel(A, B, tolerance, iterations_limit):
+    def gauss_seidel(x0, A, b, Tol, niter):
         """
         Método de Gauss-Seidel para resolver sistemas de ecuaciones lineales.
 
         Parámetros:
+        x0 : list[float] - Aproximación inicial.
         A : list[list[float]] - Matriz de coeficientes.
-        B : list[float] - Vector de resultados.
-        tolerance : float - Tolerancia para la convergencia.
-        iterations_limit : int - Número máximo de iteraciones.
+        b : list[float] - Vector del lado derecho.
+        Tol : float - Tolerancia para la convergencia.
+        niter : int - Número máximo de iteraciones.
 
         Retorna:
-        list[float] - Solución aproximada para el sistema.
+        dict - Contiene el estado (éxito o advertencia), mensaje, encabezados, tabla de iteraciones, solución y errores.
         """
-        # Inicializamos el vector X con ceros
-        X = [0.0] * len(B)
-        iteration = 0
-        error = float('inf')  # El error inicial es infinito
-
-        # Creamos una lista para almacenar las soluciones de cada iteración
+        counter = 0
+        error = Tol + 1
+        n = len(A)
+        x = x0.copy()
+        errors = []
         table = []
 
-        while iteration < iterations_limit and error > tolerance:
-            X_old = X.copy()  # Guardamos el vector de soluciones de la iteración anterior
-            for i in range(len(A)):
-                # Calculamos la suma de los términos conocidos de la ecuación
-                sum_ = sum(A[i][j] * X[j] for j in range(len(A)) if j != i)
-                # Actualizamos la incógnita X[i]
-                X[i] = (B[i] - sum_) / A[i][i]
+        while error > Tol and counter < niter:
+            x_new = x.copy()
+            for i in range(n):
+                # Sumar las contribuciones anteriores y posteriores
+                sum1 = sum(A[i][j] * x_new[j] for j in range(i))
+                sum2 = sum(A[i][j] * x[j] for j in range(i + 1, n))
+                # Actualizar la solución para x[i]
+                x_new[i] = (b[i] - sum1 - sum2) / A[i][i]
 
-            # Calculamos el error como la diferencia entre la solución actual y la anterior
-            error = max(abs(X[i] - X_old[i]) for i in range(len(X)))
+            # Calcular el error relativo
+            relative_error_vector = np.abs((x_new - x) / x_new)
+            error = np.linalg.norm(relative_error_vector, np.inf)
+            errors.append(error)
 
-            # Guardamos el estado de la solución en la tabla para cada iteración
-            table.append([iteration + 1] + X + [error])
+            counter += 1
+            x = x_new.copy()
 
-            iteration += 1
+            # Guardar datos de iteración en la tabla
+            table.append([counter, x.copy(), error])
 
-        if error <= tolerance:
-            return ResponseManager.success_response(table)
+        if error < Tol:
+            message = f"El método convergió en {counter} iteraciones."
+            status = 'success'
         else:
-            return ResponseManager.warning_response(table)
+            message = f"El método no convergió en {niter} iteraciones."
+            status = 'warning'
+
+        headers = ['Iteración', 'x', 'Error']
+        return {
+            'status': status,
+            'message': message,
+            'table_headers': headers,
+            'table': table,
+            'solution': x,
+            'errors': errors,
+        }
 
     @staticmethod
     def sor(x0, A, b, Tol, niter, w):
