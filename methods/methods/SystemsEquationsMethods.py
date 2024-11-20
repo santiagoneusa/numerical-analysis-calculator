@@ -4,6 +4,23 @@ from methods.utils.ResponseManager import ResponseManager
 class SystemsEquationsMethods:
 
     @staticmethod
+    def calculate_spectral_radius(A):
+        """
+        Calculates the spectral radius of the matrix A.
+
+        Parameters:
+        A : numpy.ndarray
+            The matrix for which the spectral radius is calculated.
+
+        Returns:
+        float
+            The spectral radius (maximum of the absolute eigenvalues of A).
+        """
+        eigenvalues = np.linalg.eigvals(A)
+        spectral_radius = max(abs(eigenvalues))
+        return spectral_radius
+
+    @staticmethod
     def jacobi(x0, A, b, Tol, niter):
         counter = 0
         error = Tol + 1
@@ -75,6 +92,8 @@ class SystemsEquationsMethods:
         errors = []
         table = []
 
+        spectral_radius = SystemsEquationsMethods.calculate_spectral_radius(A)
+
         # Para graficar las matrices 2x2
         plot_data = None
         if n == 2:
@@ -124,6 +143,7 @@ class SystemsEquationsMethods:
             'table': table,
             'solution': x,
             'errors': errors,
+            'spectral_radius': spectral_radius,
         }
 
         # If A is 2x2, prepare plot data
@@ -159,6 +179,8 @@ class SystemsEquationsMethods:
         x = x0.copy()
         errors = []
         table = []
+
+        spectral_radius = SystemsEquationsMethods.calculate_spectral_radius(A)
 
         # For plotting purposes if A is 2x2
         plot_data = None
@@ -208,6 +230,7 @@ class SystemsEquationsMethods:
             'table': table,
             'solution': x,
             'errors': errors,
+            'spectral_radius': spectral_radius,
         }
 
         # If A is 2x2, prepare plot data
