@@ -1,6 +1,7 @@
 {% extends 'interpolation/base_methods.html' %}
 
 {% block input_section %}
+<h1>{{ title }}</h1> <!-- Add this line to display the title -->
 <form action="{% url 'methods.vandermonde' %}" method="POST">
     {% csrf_token %}
     <div class="mb-3">
