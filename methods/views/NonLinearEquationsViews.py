@@ -80,7 +80,7 @@ def fixed_point(request):
 
             # Ejecutamos el método de punto fijo
             response = NonLinearEquationsMethods.fixed_point(
-                g_function, initial_guess, tolerance, iterations_limit
+                g_function, initial_guess, tolerance, iterations_limit,error_type
             )
             template_data["response"] = response
 

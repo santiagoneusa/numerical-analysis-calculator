@@ -53,7 +53,7 @@ class SystemsEquationsMethods:
         
         
     @staticmethod
-    def gauss_seidel(A, b, x0, Tol, niter):
+    def gauss_seidel(A, b, x0, Tol, niter, error_type='relative'):
         """
         Método de Gauss-Seidel para resolver sistemas de ecuaciones lineales.
 
@@ -63,6 +63,7 @@ class SystemsEquationsMethods:
         x0 : list[float] - Aproximación inicial.
         Tol : float - Tolerancia para la convergencia.
         niter : int - Número máximo de iteraciones.
+        error_type : str - Tipo de error a calcular ('relative' o 'absolute').
 
         Retorna:
         dict - Contiene el estado (éxito o advertencia), mensaje, encabezados, tabla de iteraciones, solución y errores.
@@ -83,11 +84,15 @@ class SystemsEquationsMethods:
                 # Actualizar la solución para x[i]
                 x_new[i] = (b[i] - sum1 - sum2) / A[i][i]
 
-            # Calcular el error relativo
-            relative_error_vector = np.abs((x_new - x) / x_new)
-            error = np.linalg.norm(relative_error_vector, np.inf)  # Calculamos el error infinito
-            errors.append(error)
+            # Calcular el error según el tipo de error seleccionado
+            if error_type == 'relative':
+                relative_error_vector = np.abs((x_new - x) / np.where(x_new != 0, x_new, np.finfo(float).eps))
+                error = np.linalg.norm(relative_error_vector, np.inf)
+            else:  # Error absoluto
+                absolute_error_vector = np.abs(x_new - x)
+                error = np.linalg.norm(absolute_error_vector, np.inf)
 
+            errors.append(error)
             counter += 1
             x = x_new.copy()  # Actualizamos x con la nueva solución
 
