@@ -3,6 +3,7 @@ from methods.utils.ResponseManager import ResponseManager
 from methods.utils.MatricesManager import MatricesManager
 from methods.methods.SystemsEquationsMethods import SystemsEquationsMethods
 from methods.utils.EquationsManager import EquationsManager
+from methods.utils.PlotManager import PlotManager
 from django.urls import reverse
 
 
@@ -118,7 +119,7 @@ def sor(request):
             x0_string = request.POST.get('x0')
             w = float(request.POST.get('w').replace(',', '.'))
             iterations_limit = int(request.POST.get('iterations_limit'))
-            error_type = request.POST.get('error_type', 'relative')
+            error_type = request.POST.get('error_type', "relative")
             tolerance_input = request.POST.get('tolerance').replace(',', '.')
 
             # Convert tolerance_input to tolerance value
@@ -147,6 +148,12 @@ def sor(request):
             template_data.update(response)
 
             template_data['table_headers'] = ['Iteration', 'x', 'Error']
+
+            # If plot data is available, generate the plot
+            if 'plot_data' in response:
+                plot_html = PlotManager.plot_sor_iterations(response['plot_data'])
+                template_data['plot_html'] = plot_html
+
             return render(request, "systems_equations/sor.html", {"template_data": template_data})
 
         else:
