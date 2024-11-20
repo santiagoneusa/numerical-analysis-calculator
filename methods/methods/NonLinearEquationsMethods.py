@@ -1,6 +1,7 @@
 import numpy as np
 import sympy as sp
 from methods.utils.ResponseManager import ResponseManager
+from methods.utils.SympyEquationsManager import SympyEquationsManager
 
 
 class NonLinearEquationsMethods:
@@ -152,14 +153,12 @@ class NonLinearEquationsMethods:
 
         # Parsear la función y calcular su derivada
         try:
-            f_sym = sp.sympify(function_text.replace('^', '**'))
-        except (sp.SympifyError, TypeError) as e:
-            return ResponseManager.error_response(f"Error interpreting the function: {e}")
-
-        f_num = sp.lambdify(x, f_sym, 'numpy')
-
-        df_sym = sp.diff(f_sym, x)
-        df_num = sp.lambdify(x, df_sym, 'numpy')
+            f_sym, f_num = SympyEquationsManager.parse_function(function_text)
+            df_sym = sp.diff(f_sym, x)
+            df_num = sp.lambdify(x, df_sym, modules=['numpy'])
+        except Exception as e:
+            return ResponseManager.error_response(f"Error parsing the function or its derivative: {e}")
+        
 
         # Initialize variables
         x_i = x0
@@ -173,6 +172,7 @@ class NonLinearEquationsMethods:
             try:
                 f_x_i = f_num(x_i)
                 df_x_i = df_num(x_i)
+                
             except Exception as e:
                 return ResponseManager.error_response(f"Error evaluating the function or its derivative: {e}")
 
@@ -199,10 +199,9 @@ class NonLinearEquationsMethods:
             iterations += 1
 
         # Prepare the response
-        headers = ['Iteration', 'x(i)', 'f(x(i))', 'f\'(x(i))', 'Error']
         if abs(f_x_i) <= tol or error <= tol:
-            message = f"Una raíz aproximada es x = {x_i} con f(x) = {f_x_i}"
-            return ResponseManager.success_response(table, message, headers)
+            message = f"An approximate root is x = {x_i} with f(x) = {f_x_i}"
+            return ResponseManager.success_response(table, message)
         else:
             message = f"The method did not converge after {iterations_limit} iterations."
             return ResponseManager.warning_response(table, message)

@@ -157,7 +157,6 @@ def newton_raphson(request):
             template_data["response"] = response
 
             approximate_root = response["table"][-1][1]
-
             plot_a = approximate_root - 1
             plot_b = approximate_root + 1
 
