@@ -238,7 +238,7 @@ def multiple_roots_v1(request):
             plot_b = approximate_root + 1
 
             template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
-            print(f"Plot data: {template_data['plot_data']}")
+           
 
             return render(request, 'non_linear_equations/multiple_roots_v1.html', {'template_data': template_data})
         else:
@@ -277,7 +277,7 @@ def multiple_roots_v2(request):
             plot_b = approximate_root + 1
 
             template_data["plot_data"] = PlotManager.plot_graph(response, function, plot_a, plot_b)
-            print(f"Plot data: {template_data['plot_data']}")
+            
 
             return render(request, 'non_linear_equations/multiple_roots_v2.html', {'template_data': template_data})
         else:

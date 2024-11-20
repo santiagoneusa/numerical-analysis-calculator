@@ -1,8 +1,14 @@
 import numpy as np
 from methods.utils.ResponseManager import ResponseManager
 
-class InterpolationMethods:
 
+
+
+
+    
+
+class InterpolationMethods:
+    
     @staticmethod
     def vandermonde(x_values, y_values):
         
@@ -56,18 +62,12 @@ class InterpolationMethods:
         #response['plot_data'] = plot_data
 
         return response
-        
-        
-        
-        
-
+    
     @staticmethod
     def newton_divided_difference():
         pass
-
-    import numpy as np
-
-class InterpolationMethods:
+    
+    
     @staticmethod
     def lagrange(x_values, y_values, x_to_interpolate):
         """
