@@ -21,11 +21,7 @@
 </form>
 {% endblock input_section %}
 
-{% block output_section %}
-<pre>Matrix: {{ matrix|default:"No matrix data provided" }}</pre>
-<pre>Polynomial: {{ polynomial|default:"No polynomial data provided" }}</pre>
-<pre>Coefficients: {{ coefficients|default:"No coefficients data provided" }}</pre>
-
+{% block results_section %}
     {% if matrix %}
         <h3>Vandermonde Matrix</h3>
         <table class="table">
@@ -70,4 +66,4 @@
             </tbody>
         </table>
     {% endif %}
-{% endblock output_section %}
+{% endblock results_section %}
