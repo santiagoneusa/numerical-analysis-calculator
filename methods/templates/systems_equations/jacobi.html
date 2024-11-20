@@ -22,9 +22,19 @@
         <small class="form-text text-muted">Ejemplo: "0 0 0"</small>
     </div>
 
+    <!-- Error Type Selector -->
     <div class="mb-3">
-        <label for="tolerance" class="form-label">Tolerancia</label>
-        <input type="number" class="form-control" id="tolerance" name="tolerance" step="any" required>
+        <label for="error_type" class="form-label">Error Type</label>
+        <select class="form-select" id="error_type" name="error_type" required>
+            <option value="relative" selected>Relative Error (Significant Figures)</option>
+            <option value="absolute">Absolute Error (Correct Decimals)</option>
+        </select>
+    </div>
+
+    <!-- Tolerance Input -->
+    <div class="mb-3">
+        <label for="tolerance" class="form-label" id="tolerance_label">Number of Significant Figures (k)</label>
+        <input type="number" class="form-control" id="tolerance" name="tolerance" placeholder="Example: 5" required>
     </div>
 
     <div class="mb-3">
@@ -36,6 +46,28 @@
         <button type="submit" class="btn btn-primary">Ejecutar Método Jacobi</button>
     </div>
 </form>
+
+<!-- JavaScript to adjust the tolerance label -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const errorTypeSelect = document.getElementById('error_type');
+        const toleranceLabel = document.getElementById('tolerance_label');
+        const toleranceInput = document.getElementById('tolerance');
+
+        function updateToleranceLabel() {
+            if (errorTypeSelect.value === 'relative') {
+                toleranceLabel.textContent = 'Number of Significant Figures (k)';
+                toleranceInput.placeholder = 'Example: 5';
+            } else {
+                toleranceLabel.textContent = 'Number of Correct Decimals (d)';
+                toleranceInput.placeholder = 'Example: 5';
+            }
+        }
+
+        errorTypeSelect.addEventListener('change', updateToleranceLabel);
+        updateToleranceLabel(); // Initialize on page load
+    });
+</script>
 {% endblock input_section %}
 
 {% block results_section %}
@@ -58,5 +90,16 @@
             {% endfor %}
         </tbody>
     </table>
+{% endif %}
+
+
+<!-- Display the plot if available -->
+{% if template_data.plot_html %}
+    <h3>Graphical Representation:</h3>
+    <div>
+        {{ template_data.plot_html|safe }}
+    </div>
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 {% endif %}
 {% endblock results_section %}

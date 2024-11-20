@@ -2,11 +2,6 @@ import numpy as np
 from methods.utils.ResponseManager import ResponseManager
 
 
-
-
-
-    
-
 class InterpolationMethods:
     
     @staticmethod
@@ -15,11 +10,16 @@ class InterpolationMethods:
         n = len(x_values)
         if n != len(y_values):
             raise ValueError("The vectors x and y must have the same length.")
+        
+        if len(set(x_values)) != len(x_values):
+            raise ValueError("The x-values must be distinct.")
+
 
         # Sort the points by x to avoid problems
         sorted_indices = np.argsort(x_values)
         x = np.array(x_values)[sorted_indices]
         y = np.array(y_values)[sorted_indices]
+    
         
         # Construct the Vandermonde matrix A
         A = np.vander(x, increasing=True)
@@ -36,12 +36,7 @@ class InterpolationMethods:
         for i, coeff in enumerate(coefficients):
             table.append([f"x^{i}", f"{coeff:.4f}"])
 
-        # Prepare the data for plotting (even though it's not used for plotting here)
-        """ plot_data = {
-            'x': x.tolist(),
-            'y': y.tolist(),
-            'coefficients': coefficients.tolist()
-        } """
+        ""
 
         # Define the headers for the table
         headers = ['Term', 'Coefficient']
