@@ -63,25 +63,58 @@ def vandermonde(request):
 
 def newton_divided_difference(request):
     template_data = {}
-    template_data["title"] = "Newton divided difference method"
-    template_data["breadcrumbs"] = [
-        ("Home", reverse("home")),
-        ("Interpolation", reverse("home") + "#methods-section"),
-        ("Newton divided difference", reverse("methods.newton_divided_difference")),
-    ]
+    template_data["title"] = "Newton Divided Difference Method"
 
     try:
-        if request.POST:
-            # TODO: Get the inputs
-            # TODO: Implement Newton divided difference method
-            # TODO: Implement the response
+        if request.method == 'POST':
+            # Obtener los valores de entrada del formulario
+            x_values_input = request.POST.get('x_values', '')
+            y_values_input = request.POST.get('y_values', '')
+
+            # Validar que se ingresen ambos valores
+            if not x_values_input.strip() or not y_values_input.strip():
+                raise ValueError("Both x values and y values must be provided.")
+
+            # Convertir las entradas a listas de números
+            x_values = list(map(float, x_values_input.replace(',', ' ').split()))
+            y_values = list(map(float, y_values_input.replace(',', ' ').split()))
+            x_to_interpolate_input = request.POST.get('x_to_interpolate', '').strip()
+            if not x_to_interpolate_input:
+                raise ValueError("You must provide a value for x to interpolate.")
+
+            x_to_interpolate = float(x_to_interpolate_input)
+
+
+
+            # Validar que los vectores x y y tengan la misma longitud
+            if len(x_values) != len(y_values):
+                raise ValueError("The x and y vectors must have the same length.")
+
+            # Validar que los valores de x sean únicos
+            if len(set(x_values)) != len(x_values):
+                raise ValueError("The x values must be distinct (no duplicates).")
+
+            # Llamar al método de interpolación de Newton Divided Difference
+            response = InterpolationMethods.newton_divided_difference(x_values, y_values, x_to_interpolate)
+
+            # Generar el gráfico
+            graphic = PlotManager.plot_newton_divided_difference(response['plot_data']['x'], response['plot_data']['y'])
+
+            # Agregar el gráfico y otros datos a la plantilla
+            response['graphic'] = graphic
+            template_data.update(response)
+
+            # Renderizar la plantilla con los datos generados
             return render(request, "interpolation/newton_divided_difference.html", {"template_data": template_data})
+
         else:
-            template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
+            # Si es un GET, solo renderizamos la plantilla vacía
             return render(request, "interpolation/newton_divided_difference.html", {"template_data": template_data})
 
     except Exception as e:
-        template_data = ResponseManager.error_response(e)
+        # Si hay un error, capturarlo y renderizarlo en la plantilla
+        template_data = ResponseManager.error_response(str(e))
+        template_data["title"] = "Newton Divided Difference Method"
         return render(request, "interpolation/newton_divided_difference.html", {"template_data": template_data})
 
 
@@ -108,7 +141,7 @@ def lagrange(request):
             response = InterpolationMethods.lagrange(x_values, y_values, x_to_interpolate)
 
             # Generar el gráfico (si es necesario)
-            graphic = PlotManager.plot_lagrange(
+            graphic = PlotManager.plot_newton_divided_difference(
                 x=response['plot_data']['x'],
                 y=response['plot_data']['y']
             )
@@ -118,7 +151,6 @@ def lagrange(request):
 
             # Añadir la respuesta de la interpolación y el gráfico a los datos de la plantilla
             template_data.update(response)
-        
 
             # Renderizar la plantilla con los datos generados
             return render(request, "interpolation/lagrange.html", {"template_data": template_data})

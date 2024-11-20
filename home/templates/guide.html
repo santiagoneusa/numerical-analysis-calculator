@@ -8,150 +8,314 @@
 <div class="mb-5">
     <div class="card" style="width: 200px;">
         <div class="card-body p-3">
-            <h5 class="card-title mb-3">Index</h5>
+            <h5 class="card-title mb-3">Índice</h5>
             <div class="mb-3">
-                <h6 class="mb-2"><a href="#math-expressions" class="text-decoration-none"><span class="me-2">1.</span><i class="fas fa-square-root-alt me-2"></i>Math Expressions</a></h6>
+                <h6 class="mb-2"><a href="#expresiones-matematicas" class="text-decoration-none"><span class="me-2">1.</span><i class="fas fa-square-root-alt me-2"></i>Expresiones Matemáticas</a></h6>
             </div>
             <div>
-                <h6 class="mb-2"><a href="#data-entry" class="text-decoration-none"><span class="me-2">2.</span><i class="fas fa-table me-2"></i>Data Entry</a></h6>
+                <h6 class="mb-2"><a href="#ingreso-de-datos" class="text-decoration-none"><span class="me-2">2.</span><i class="fas fa-table me-2"></i>Ingreso de Datos</a></h6>
                 <ul class="list-unstyled ms-4 mb-0">
-                    <li class="mb-1"><a href="#non-linear" class="text-decoration-none">Non-linear</a></li>
-                    <li class="mb-1"><a href="#linear" class="text-decoration-none">Linear</a></li>
-                    <li><a href="#differential" class="text-decoration-none">Differential</a></li>
+                    <li class="mb-1"><a href="#ecuaciones-no-lineales" class="text-decoration-none">Ecuaciones No Lineales</a></li>
+                    <li class="mb-1"><a href="#ecuaciones-lineales" class="text-decoration-none">Ecuaciones Lineales</a></li>
+                    <li class="mb-1"><a href="#ecuaciones-diferenciales" class="text-decoration-none">Ecuaciones Diferenciales</a></li>
+                    <li><a href="#consejos-generales" class="text-decoration-none">Consejos Generales</a></li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
 
-<h2 id="math-expressions" class="mt-5 mb-4">1. Math Expressions</h2>
+<h2 id="expresiones-matematicas" class="mt-5 mb-4">1. Expresiones Matemáticas</h2>
+
+<p>Al ingresar expresiones matemáticas en la aplicación, es crucial utilizar la sintaxis correcta para que las funciones se interpreten adecuadamente. A continuación, encontrarás una lista detallada de funciones matemáticas y operadores que puedes usar, junto con ejemplos de cómo aplicarlos.</p>
 
 <table class="table table-hover table-bordered">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Expression</th>
-            <th>Example</th>
+            <th>Nombre</th>
+            <th>Sintaxis</th>
+            <th>Ejemplo</th>
+            <th>Descripción</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
         <tr>
-            <td>Logarithm</td>
-            <td>log(x)</td>
-            <td>log(10)</td>
+            <td>Adición</td>
+            <td><code>+</code></td>
+            <td><code>x + y</code></td>
+            <td>Suma dos números.</td>
         </tr>
         <tr>
-            <td>Exponential</td>
-            <td>e^x or exp(x)</td>
-            <td>e^2 or exp(2)</td>
+            <td>Sustracción</td>
+            <td><code>-</code></td>
+            <td><code>x - y</code></td>
+            <td>Resta un número de otro.</td>
         </tr>
         <tr>
-            <td>Square root</td>
-            <td>sqrt(x)</td>
-            <td>sqrt(16)</td>
+            <td>Multiplicación</td>
+            <td><code>*</code></td>
+            <td><code>x * y</code></td>
+            <td>Multiplica dos números.</td>
         </tr>
         <tr>
-            <td>Sine</td>
-            <td>sin(x)</td>
-            <td>sin(pi/2)</td>
+            <td>División</td>
+            <td><code>/</code></td>
+            <td><code>x / y</code></td>
+            <td>Divide un número entre otro.</td>
         </tr>
         <tr>
-            <td>Cosine</td>
-            <td>cos(x)</td>
-            <td>cos(0)</td>
+            <td>Exponenciación</td>
+            <td><code>**</code> o <code>^</code></td>
+            <td><code>x**2</code> o <code>x^2</code></td>
+            <td>Eleva un número a una potencia.</td>
         </tr>
         <tr>
-            <td>Tangent</td>
-            <td>tan(x)</td>
-            <td>tan(pi/4)</td>
+            <td>Logaritmo Natural</td>
+            <td><code>log(x)</code></td>
+            <td><code>log(e)</code></td>
+            <td>Calcula el logaritmo natural de x (base e).</td>
         </tr>
-    </tbody class="table-group-divider">
+        <tr>
+            <td>Logaritmo Base 10</td>
+            <td><code>log10(x)</code></td>
+            <td><code>log10(100)</code></td>
+            <td>Calcula el logaritmo de x con base 10.</td>
+        </tr>
+        <tr>
+            <td>Exponencial</td>
+            <td><code>exp(x)</code> o <code>e^x</code></td>
+            <td><code>exp(2)</code> o <code>e^2</code></td>
+            <td>Calcula e elevado a la potencia x.</td>
+        </tr>
+        <tr>
+            <td>Raíz Cuadrada</td>
+            <td><code>sqrt(x)</code></td>
+            <td><code>sqrt(16)</code></td>
+            <td>Calcula la raíz cuadrada de x.</td>
+        </tr>
+        <tr>
+            <td>Seno</td>
+            <td><code>sin(x)</code></td>
+            <td><code>sin(pi/2)</code></td>
+            <td>Calcula el seno de x (en radianes).</td>
+        </tr>
+        <tr>
+            <td>Coseno</td>
+            <td><code>cos(x)</code></td>
+            <td><code>cos(0)</code></td>
+            <td>Calcula el coseno de x (en radianes).</td>
+        </tr>
+        <tr>
+            <td>Tangente</td>
+            <td><code>tan(x)</code></td>
+            <td><code>tan(pi/4)</code></td>
+            <td>Calcula la tangente de x (en radianes).</td>
+        </tr>
+        <tr>
+            <td>Valor Absoluto</td>
+            <td><code>abs(x)</code></td>
+            <td><code>abs(-5)</code></td>
+            <td>Devuelve el valor absoluto de x.</td>
+        </tr>
+        <tr>
+            <td>Constantes</td>
+            <td><code>pi</code>, <code>e</code></td>
+            <td><code>sin(pi)</code>, <code>exp(1)</code></td>
+            <td>Constantes matemáticas π (≈ 3.1416) y e (≈ 2.7183).</td>
+        </tr>
+    </tbody>
 </table>
 
-<h2 id="data-entry" class="mt-5 mb-4">2. Data Entry</h2>
+<h3 class="mt-4">Notas Importantes:</h3>
+<ul>
+    <li>Utiliza <code>**</code> o <code>^</code> para la exponenciación. Ambos son aceptados.</li>
+    <li>Asegúrate de que todos los paréntesis estén correctamente cerrados.</li>
+    <li>Las funciones trigonométricas asumen que el valor está en radianes.</li>
+    <li>Para la multiplicación, siempre usa el símbolo <code>*</code> (por ejemplo, escribe <code>2*x</code> en lugar de <code>2x</code>).</li>
+    <li>Usa letras minúsculas para variables y funciones.</li>
+    <li>Los espacios son ignorados pero pueden mejorar la legibilidad.</li>
+</ul>
 
-<h4 id="non-linear" class="mt-4 mb-3">Non-linear Equation Methods</h4>
+<h2 id="ingreso-de-datos" class="mt-5 mb-4">2. Ingreso de Datos</h2>
+
+<p>Dependiendo del método que utilices (ecuaciones no lineales, ecuaciones lineales o ecuaciones diferenciales), necesitarás ingresar datos en formatos específicos. A continuación, encontrarás instrucciones detalladas y ejemplos para cada tipo de método.</p>
+
+<h3 id="ecuaciones-no-lineales" class="mt-4 mb-3">2.1 Métodos de Ecuaciones No Lineales</h3>
+<p>Al resolver ecuaciones no lineales, generalmente deberás proporcionar la función, conjeturas iniciales, tolerancias y límites de iteraciones.</p>
+
 <table class="table table-hover table-bordered">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Data Type</th>
-            <th>Example</th>
+            <th>Parámetro</th>
+            <th>Descripción</th>
+            <th>Tipo de Dato</th>
+            <th>Ejemplo</th>
         </tr>
     </thead>
-    <tbody class="table-group-divider">
+    <tbody>
         <tr>
-            <td>Function</td>
-            <td>String</td>
-            <td>"x^2 - 4"</td>
+            <td>Función <code>f(x)</code></td>
+            <td>La función matemática de la cual deseas encontrar la raíz.</td>
+            <td>Cadena de texto</td>
+            <td><code>"x**3 - x - 2"</code></td>
         </tr>
         <tr>
-            <td>Initial guess</td>
-            <td>Float</td>
-            <td>1.5</td>
+            <td>Conjetura Inicial <code>x0</code></td>
+            <td>Tu punto de partida para métodos iterativos.</td>
+            <td>Número Real</td>
+            <td><code>1.5</code></td>
         </tr>
         <tr>
-            <td>Tolerance</td>
-            <td>Float</td>
-            <td>0.0001</td>
+            <td>Segunda Conjetura Inicial <code>x1</code> (si es necesario)</td>
+            <td>Utilizada en métodos como Secante o Bisección.</td>
+            <td>Número Real</td>
+            <td><code>2.0</code></td>
         </tr>
-    </tbody class="table-group-divider">
+        <tr>
+            <td>Tolerancia</td>
+            <td>El margen de error aceptable para la solución.</td>
+            <td>Número Real</td>
+            <td><code>1e-5</code></td>
+        </tr>
+        <tr>
+            <td>Número Máximo de Iteraciones</td>
+            <td>El límite de iteraciones a realizar.</td>
+            <td>Entero</td>
+            <td><code>100</code></td>
+        </tr>
+        <tr>
+            <td>Tipo de Error</td>
+            <td>Elige entre error relativo o absoluto para los criterios de parada.</td>
+            <td>Cadena de texto</td>
+            <td><code>"relative"</code> o <code>"absolute"</code></td>
+        </tr>
+    </tbody>
 </table>
 
-<h4 id="linear" class="mt-4 mb-3">Linear Equation Methods</h4>
+<h4>Ejemplo de Entrada:</h4>
+<ul>
+    <li><strong>Función:</strong> <code>"x**3 - x - 2"</code></li>
+    <li><strong>Conjetura Inicial x0:</strong> <code>1.5</code></li>
+    <li><strong>Tolerancia:</strong> <code>1e-5</code></li>
+    <li><strong>Número Máximo de Iteraciones:</strong> <code>100</code></li>
+    <li><strong>Tipo de Error:</strong> <code>"relative"</code></li>
+</ul>
+
+<h3 id="ecuaciones-lineales" class="mt-4 mb-3">2.2 Métodos de Ecuaciones Lineales</h3>
+<p>Para resolver sistemas de ecuaciones lineales, debes ingresar la matriz de coeficientes, el vector de términos independientes, conjeturas iniciales (para métodos iterativos) y tolerancias.</p>
+
 <table class="table table-hover table-bordered">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Data Type</th>
-            <th>Example</th>
+            <th>Parámetro</th>
+            <th>Descripción</th>
+            <th>Tipo de Dato</th>
+            <th>Ejemplo</th>
         </tr>
     </thead>
-    <tbody class="table-group-divider">
+    <tbody>
         <tr>
-            <td>Coefficient matrix</td>
-            <td>2D List of Floats</td>
-            <td>[[2, 1], [1, 3]]</td>
+            <td>Matriz de Coeficientes <code>A</code></td>
+            <td>Una matriz cuadrada que representa los coeficientes de las variables.</td>
+            <td>Cadena de texto (Notación de matriz)</td>
+            <td><code>"[[4, -1], [-1, 3]]"</code></td>
         </tr>
         <tr>
-            <td>Constant vector</td>
-            <td>List of Floats</td>
-            <td>[4, 5]</td>
+            <td>Vector de Términos Independientes <code>b</code></td>
+            <td>Un vector que representa los términos independientes en las ecuaciones.</td>
+            <td>Cadena de texto (Notación de vector)</td>
+            <td><code>"[15, 10]"</code></td>
         </tr>
-    </tbody class="table-group-divider">
+        <tr>
+            <td>Conjetura Inicial <code>x0</code></td>
+            <td>Valores iniciales para métodos iterativos.</td>
+            <td>Cadena de texto (Notación de vector)</td>
+            <td><code>"[0, 0]"</code></td>
+        </tr>
+        <tr>
+            <td>Tolerancia</td>
+            <td>El margen de error aceptable para la solución.</td>
+            <td>Número Real</td>
+            <td><code>1e-5</code></td>
+        </tr>
+        <tr>
+            <td>Número Máximo de Iteraciones</td>
+            <td>El límite de iteraciones a realizar.</td>
+            <td>Entero</td>
+            <td><code>100</code></td>
+        </tr>
+    </tbody>
 </table>
 
-<h4 id="differential" class="mt-4 mb-3">Differential Equation Methods</h4>
+<h4>Formato de Entrada para Matrices:</h4>
+<p>Al ingresar matrices y vectores, puedes utilizar los siguientes formatos:</p>
+<ul>
+    <li>Separa los elementos con espacios o comas.</li>
+    <li>Separa las filas con punto y coma o nuevas líneas.</li>
+    <li>Encierra toda la matriz o vector entre corchetes.</li>
+</ul>
+<p><strong>Ejemplos:</strong></p>
+<ul>
+    <li><code>"[4 -1; -1 3]"</code></li>
+    <li><code>"[[4, -1], [-1, 3]]"</code></li>
+    <li><code>"[15; 10]"</code> para vectores.</li>
+</ul>
+
+<h3 id="ecuaciones-diferenciales" class="mt-4 mb-3">2.3 Métodos de Ecuaciones Diferenciales</h3>
+<p>Al resolver ecuaciones diferenciales numéricamente, debes proporcionar la ecuación diferencial, condiciones iniciales, rango y tamaño de paso.</p>
+
 <table class="table table-hover table-bordered">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Data Type</th>
-            <th>Example</th>
+            <th>Parámetro</th>
+            <th>Descripción</th>
+            <th>Tipo de Dato</th>
+            <th>Ejemplo</th>
         </tr>
     </thead>
-    <tbody class="table-group-divider">
+    <tbody>
         <tr>
-            <td>Function</td>
-            <td>String</td>
-            <td>"y' = x + y"</td>
+            <td>Ecuación Diferencial <code>dy/dx = f(x, y)</code></td>
+            <td>La ecuación diferencial a resolver.</td>
+            <td>Cadena de texto</td>
+            <td><code>"dy/dx = x + y"</code></td>
         </tr>
         <tr>
-            <td>Initial condition</td>
-            <td>Tuple of Floats</td>
-            <td>(0, 1)</td>
+            <td>Condición Inicial <code>(x0, y0)</code></td>
+            <td>El punto de inicio de la solución.</td>
+            <td>Tupla de Números Reales</td>
+            <td><code>(0, 1)</code></td>
         </tr>
         <tr>
-            <td>Range</td>
-            <td>Tuple of Floats</td>
-            <td>(0, 10)</td>
+            <td>Rango <code>[a, b]</code></td>
+            <td>El intervalo en el cual resolver la ecuación.</td>
+            <td>Tupla de Números Reales</td>
+            <td><code>(0, 5)</code></td>
         </tr>
         <tr>
-            <td>Step size</td>
-            <td>Float</td>
-            <td>0.1</td>
+            <td>Tamaño de Paso <code>h</code></td>
+            <td>El incremento entre valores de x en la solución.</td>
+            <td>Número Real</td>
+            <td><code>0.1</code></td>
         </tr>
-    </tbody class="table-group-divider">
+    </tbody>
 </table>
+
+<h4>Ejemplo de Entrada:</h4>
+<ul>
+    <li><strong>Ecuación Diferencial:</strong> <code>"dy/dx = x + y"</code></li>
+    <li><strong>Condición Inicial:</strong> <code>(0, 1)</code></li>
+    <li><strong>Rango:</strong> <code>(0, 5)</code></li>
+    <li><strong>Tamaño de Paso:</strong> <code>0.1</code></li>
+</ul>
+
+<h3 id="consejos-generales" class="mt-4 mb-3">2.4 Consejos Generales para el Ingreso de Datos</h3>
+<ul>
+    <li>Verifica tus entradas en busca de errores de tipeo o sintaxis.</li>
+    <li>Asegúrate de que todas las funciones y variables estén definidas.</li>
+    <li>Utiliza unidades y escalas consistentes para todos los valores numéricos.</li>
+    <li>Si ocurre un error, lee cuidadosamente el mensaje para entender el problema.</li>
+    <li>Consulta la documentación del método para conocer requisitos específicos de entrada.</li>
+</ul>
 
 {% endblock body %}

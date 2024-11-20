@@ -3,41 +3,96 @@
 {% block input_section %}
 <form action="{% url 'methods.bisection' %}" method="POST">
     {% csrf_token %}
-    <div class="row g-3 align-items-center">
-        <div class="col mb-3">
-            <label for="a" class="form-label">Lower interval value (a)</label>
-            <input type="text" class="form-control" id="a" name="a" required>
-        </div>
-
-        <div class="col mb-3">
-            <label for="b" class="form-label">Upper interval value (b)</label>
-            <input type="text" class="form-control" id="b" name="b" required>
-        </div>
+    <div class="mb-3">
+        <label for="function" class="form-label">Function f(x)</label>
+        <input type="text" class="form-control" id="function" name="function" placeholder="Example: x^2 - 4" required>
     </div>
-
-    <div class="row g-3 align-items-center">
-        <div class="mb-3">
-            <label for="function" class="form-label">Function f(x)</label>
-            <input type="text" class="form-control" id="function" name="function" placeholder="Use x as the variable" required>
-        </div>
+    <div class="mb-3">
+        <label for="a" class="form-label">Left endpoint a</label>
+        <input type="number" class="form-control" id="a" name="a" step="any" required>
     </div>
-
-    <div class="row g-3 align-items-center">
-        <div class="mb-3">
-            <label for="correct_decimals" class="form-label">Correct decimals</label>
-            <input type="text" class="form-control" id="correct_decimals" name="correct_decimals" placeholder="Example: 0.05" required>
-        </div>
+    <div class="mb-3">
+        <label for="b" class="form-label">Right endpoint b</label>
+        <input type="number" class="form-control" id="b" name="b" step="any" required>
     </div>
-
-    <div class="row g-3 align-items-center">
-        <div class="mb-3">
-            <label for="iterations_limit" class="form-label">Iterations limit</label>
-            <input type="text" class="form-control" id="iterations_limit" name="iterations_limit" placeholder="Example: 100" required>
-        </div>
+    <!-- Error Type Selector -->
+    <div class="mb-3">
+        <label for="error_type" class="form-label">Error Type</label>
+        <select class="form-select" id="error_type" name="error_type" required>
+            <option value="relative" selected>Relative Error (Significant Figures)</option>
+            <option value="absolute">Absolute Error (Correct Decimals)</option>
+        </select>
     </div>
-
-    <div class="text-center">
-        <button type="submit" class="btn btn-primary">Run bisection method</button>
+    <!-- Tolerance Input -->
+    <div class="mb-3">
+        <label for="tolerance" class="form-label" id="tolerance_label">Number of Significant Figures (k)</label>
+        <input type="number" class="form-control" id="tolerance" name="tolerance" placeholder="Example: 5" required>
     </div>
+    <div class="mb-3">
+        <label for="iterations_limit" class="form-label">Maximum number of iterations</label>
+        <input type="number" class="form-control" id="iterations_limit" name="iterations_limit" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Calculate</button>
 </form>
+
+<!-- JavaScript to adjust the tolerance label -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const errorTypeSelect = document.getElementById('error_type');
+        const toleranceLabel = document.getElementById('tolerance_label');
+        const toleranceInput = document.getElementById('tolerance');
+
+        function updateToleranceLabel() {
+            if (errorTypeSelect.value === 'relative') {
+                toleranceLabel.textContent = 'Number of Significant Figures (k)';
+                toleranceInput.placeholder = 'Example: 5';
+            } else {
+                toleranceLabel.textContent = 'Number of Correct Decimals (d)';
+                toleranceInput.placeholder = 'Example: 5';
+            }
+        }
+
+        errorTypeSelect.addEventListener('change', updateToleranceLabel);
+        updateToleranceLabel(); // Initialize on page load
+    });
+</script>
 {% endblock input_section %}
+
+{% block results_section %}
+{% if template_data %}
+    {% if template_data.status == 'success' %}
+        <div class="alert alert-success" role="alert">
+            {{ template_data.message }}
+        </div>
+    {% elif template_data.status == 'warning' %}
+        <div class="alert alert-warning" role="alert">
+            {{ template_data.message }}
+        </div>
+    {% elif template_data.status == 'error' %}
+        <div class="alert alert-danger" role="alert">
+            {{ template_data.message }}
+        </div>
+    {% endif %}
+
+    {% if template_data.table %}
+        <table class="table">
+            <thead>
+                <tr>
+                    {% for header in template_data.table_headers %}
+                        <th>{{ header }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in template_data.table %}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endif %}
+{% endblock results_section %}

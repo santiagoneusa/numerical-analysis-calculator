@@ -91,4 +91,14 @@
         </tbody>
     </table>
 {% endif %}
+
+<!-- Display the plot if available -->
+{% if template_data.plot_html %}
+    <h3>Graphical Representation:</h3>
+    <div>
+        {{ template_data.plot_html|safe }}
+    </div>
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endif %}
 {% endblock results_section %}

@@ -98,6 +98,11 @@ class SystemsEquationsMethods:
         errors = []
         table = []
 
+        # Para graficar las matrices 2x2
+        plot_data = None
+        if n == 2:
+            plot_points = [x.copy()]  # Guardar el valor inicial para graficarlo
+
         while error > Tol and counter < niter:
             x_new = x.copy()  # Hacemos una copia para evitar modificar x mientras lo usamos
             for i in range(n):
@@ -122,6 +127,10 @@ class SystemsEquationsMethods:
             # Guardar datos de iteración en la tabla
             table.append([counter, x.copy(), error])
 
+            # Si A es 2x2, guardamos los puntos para graficarlos
+            if n == 2:
+                plot_points.append(x.copy())
+
         if error < Tol:
             message = f"El método convergió en {counter} iteraciones."
             status = 'success'
@@ -130,7 +139,8 @@ class SystemsEquationsMethods:
             status = 'warning'
 
         headers = ['Iteración', 'x', 'Error']
-        return {
+
+        result = {
             'status': status,
             'message': message,
             'table_headers': headers,
@@ -138,6 +148,16 @@ class SystemsEquationsMethods:
             'solution': x,
             'errors': errors,
         }
+
+        # If A is 2x2, prepare plot data
+        if n == 2:
+            result['plot_data'] = {
+                'A': A,
+                'b': b,
+                'iterations': plot_points,
+            }
+
+        return result
 
     @staticmethod
     def sor(x0, A, b, Tol, niter, w, error_type='relative'):
