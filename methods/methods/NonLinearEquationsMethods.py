@@ -612,51 +612,102 @@ class NonLinearEquationsMethods:
 
 
     @staticmethod
-    def multiple_roots_v2(x0, tol, iterations_limit, function):
-        
-         
+    def multiple_roots_v2(x0, tol, iterations_limit, function_text, error_type='relative'):
+        """
+        Multiple Roots Method v2 with error type selector.
+
+        Parameters:
+        x0 : float
+            Initial guess for the root.
+        tol : float
+            Tolerance for convergence.
+        iterations_limit : int
+            Maximum number of iterations.
+        function_text : str
+            Function f(x) as a string.
+        error_type : str
+            Type of error to calculate ('relative' or 'absolute').
+
+        Returns:
+        dict - Contains the status, message, table, headers, etc.
+        """
+        import sympy as sp
+        import math
+
         x_symbol = sp.symbols('x')
 
-        # Parsear la función y calcular su derivada
+        # Input validation
+        if not EquationsManager.is_valid_number(x0):
+            return ResponseManager.error_response("Initial guess x0 must be a valid number.")
+
+        if not EquationsManager.is_valid_number(tol) or tol <= 0:
+            return ResponseManager.error_response("Tolerance must be a positive number.")
+
+        if not isinstance(iterations_limit, int) or iterations_limit <= 0:
+            return ResponseManager.error_response("Iterations limit must be a positive integer.")
+
+        if error_type not in ('relative', 'absolute'):
+            return ResponseManager.error_response("Error type must be 'relative' or 'absolute'.")
+
+        # Parse the function and its derivatives
         try:
-            f_sym = sp.sympify(function.replace('^', '**'))
+            f_sym = sp.sympify(function_text.replace('^', '**'))
+            f_num = sp.lambdify(x_symbol, f_sym, 'numpy')
+            df_sym = sp.diff(f_sym, x_symbol)
+            df_num = sp.lambdify(x_symbol, df_sym, 'numpy')
+            df2_sym = sp.diff(f_sym, x_symbol, 2)
+            df2_num = sp.lambdify(x_symbol, df2_sym, 'numpy')
         except (sp.SympifyError, TypeError) as e:
             return ResponseManager.error_response(f"Error interpreting the function: {e}")
-        
-        f_num = sp.lambdify(x_symbol, f_sym, 'numpy')
 
-        df_sym = sp.diff(f_sym, x_symbol)
-        df_num = sp.lambdify(x_symbol, df_sym, 'numpy')
-        
-        df2_sym = sp.diff(f_sym, x_symbol, 2)
-        df2_num = sp.lambdify(x_symbol, df2_sym, 'numpy')
-        
-        # Initialize lists and variables
-        xn = []
-        x = x0
-        f = f_num(x)
-        derivada = df_num(x)
-        segunda_derivada = df2_num(x)
+        # Initialize variables
+        x_i = x0
         iteration = 0
-        Error = float('inf')  # Initial error set to a high value
-        xn.append(x)
+        error = float('inf')
         table = []
-        
-        while Error > tol and f != 0  and iteration < iterations_limit:
-            x = x - (f * derivada) / (derivada**2 - f * segunda_derivada)
-            derivada = df_num(x)
-            segunda_derivada = df2_num(x)
-    
-            f = f_num(x)
-            xn.append(x)
-            iteration += 1
-            Error = abs(xn[iteration] - xn[iteration - 1])
-            table.append([iteration, x, f, Error]) 
-        
+        headers = ['Iteration', 'x_i', 'f(x_i)', "f'(x_i)", "f''(x_i)", 'Error']
 
-       
-        if iteration == iterations_limit:
-            return ResponseManager.warning_response(table)
-        else:
-            return ResponseManager.success_response(table)
-        
+        # Start iterations
+        while error > tol and iteration < iterations_limit:
+            try:
+                f_x_i = f_num(x_i)
+                df_x_i = df_num(x_i)
+                df2_x_i = df2_num(x_i)
+            except Exception as e:
+                return ResponseManager.error_response(f"Error evaluating the function or its derivatives at x = {x_i}: {e}")
+
+            # Check for zero denominator
+            denominator = df_x_i**2 - f_x_i * df2_x_i
+            if denominator == 0:
+                return ResponseManager.error_response(f"Denominator is zero at x = {x_i}. Cannot continue.")
+
+            # Update x_i
+            x_next = x_i - (f_x_i * df_x_i) / denominator
+
+            # Calculate the error
+            if iteration == 0:
+                error = float('inf')  # No error in the first iteration
+            else:
+                if error_type == 'relative':
+                    if x_next != 0:
+                        error = abs((x_next - x_i) / x_next)
+                    else:
+                        error = float('inf')
+                else:  # Absolute error
+                    error = abs(x_next - x_i)
+
+            # Add data to the table
+            table.append([iteration, x_i, f_x_i, df_x_i, df2_x_i, error])
+
+            # Check for convergence
+            if abs(f_x_i) <= tol or error <= tol:
+                message = f"An approximate root is x = {x_next} with f(x) = {f_x_i}"
+                return ResponseManager.success_response(table, message, headers)
+
+            # Prepare for next iteration
+            x_i = x_next
+            iteration += 1
+
+        # If the method did not converge within the iteration limit
+        message = f"The method did not converge after {iterations_limit} iterations."
+        return ResponseManager.warning_response(table, message, headers)
