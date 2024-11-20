@@ -113,15 +113,24 @@ def false_position(request):
             a = float(request.POST.get("a"))
             b = float(request.POST.get("b"))
             function_str = request.POST.get("function")
-            tolerance = float(request.POST.get("tolerance"))
+            error_type = request.POST.get("error_type", "relative")
+            tolerance_input = request.POST.get("tolerance").replace(",", ".")
             iterations_limit = int(request.POST.get("iterations_limit"))
+
+            # Calcular la tolerancia según el tipo de error
+            if error_type == "relative":
+                k = int(tolerance_input)
+                tolerance = EquationsManager.significant_figures_to_tolerance(k)
+            else:
+                d = int(tolerance_input)
+                tolerance = EquationsManager.correct_decimals_to_tolerance(d)
 
             # Parsear la función
             function = EquationsManager.parse_function(function_str)
-            
+
             # Ejecutar el método de falsa posición
             response = NonLinearEquationsMethods.false_position(
-                a, b, function, tolerance, iterations_limit
+                a, b, function, tolerance, iterations_limit, error_type
             )
 
             template_data["response"] = response
