@@ -1,0 +1,56 @@
+{% extends 'interpolation/base_methods.html' %}
+
+{% block input_section %}
+<form action="{% url 'methods.newton_divided_difference' %}" method="POST">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label for="x_values" class="form-label">x values</label>
+        <input type="text" class="form-control" id="x_values" name="x_values" required>
+        <small class="form-text text-muted">Example: "1 2 3 4 5"</small>
+    </div>
+
+    <div class="mb-3">
+        <label for="y_values" class="form-label">y values</label>
+        <input type="text" class="form-control" id="y_values" name="y_values" required>
+        <small class="form-text text-muted">Example: "2 3 5 4 6"</small>
+    </div>
+
+    <div class="mb-3">
+        <label for="x_to_interpolate" class="form-label">x value to interpolate</label>
+        <input type="number" class="form-control" id="x_to_interpolate" name="x_to_interpolate" required>
+        <small class="form-text text-muted">Example: "2.5"</small>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Calculate Newton Divided Difference Interpolation</button>
+    </div>
+</form>
+{% endblock input_section %}
+
+{% block results_section %}
+{% if template_data %}
+    <h4 class="mt-4">Polynomial Calculation Details:</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <tbody>
+                {% if template_data.table %}
+                    {% for row in template_data.table %}
+                        <tr>
+                            {% for cell in row %}
+                                <td class="text-center">{{ cell }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">No data available</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <h4>Graphic of the Interpolation:</h4>
+    <img src="data:image/png;base64,{{ template_data.graphic }}" alt="Graphic of Lagrange">
+{% endif %}
+{% endblock results_section %}
