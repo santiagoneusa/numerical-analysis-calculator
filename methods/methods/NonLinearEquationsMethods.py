@@ -299,6 +299,7 @@ class NonLinearEquationsMethods:
     @staticmethod
     def multiple_roots_v2(x0, tol, iterations_limit, function):
         
+         
         x_symbol = sp.symbols('x')
 
         # Parsear la función y calcular su derivada
@@ -327,10 +328,60 @@ class NonLinearEquationsMethods:
         table = []
         
         while Error > tol and f != 0  and iteration < iterations_limit:
-            x = x - ( f * derivada / derivada**2 - (f*segunda_derivada))
+            x = x - (f * derivada) / (derivada**2 - f * segunda_derivada)
             derivada = df_num(x)
             segunda_derivada = df2_num(x)
+    
             f = f_num(x)
             xn.append(x)
             iteration += 1
             Error = abs(xn[iteration] - xn[iteration - 1])
+            table.append([iteration, x, f, Error]) 
+       
+        
+        """ x_symbol = sp.symbols('x')
+
+        # Parse the function and calculate its derivatives
+        try:
+            f_sym = sp.sympify(function.replace('^', '**'))
+        except (sp.SympifyError, TypeError) as e:
+            return ResponseManager.error_response(f"Error interpreting the function: {e}")
+
+        try:
+            f_num = sp.lambdify(x_symbol, f_sym, 'numpy')
+            df_sym = sp.diff(f_sym, x_symbol)
+            df_num = sp.lambdify(x_symbol, df_sym, 'numpy')
+            df2_sym = sp.diff(f_sym, x_symbol, 2)
+            df2_num = sp.lambdify(x_symbol, df2_sym, 'numpy')
+        except Exception as e:
+            return ResponseManager.error_response(f"Error lambdifying the function or its derivatives: {e}")
+
+        # Initialize variables
+        xn = [x0]
+        x = x0
+        iteration = 0
+        Error = float('inf')  # Start with a high error
+        table = []
+
+        while Error > tol and iteration < iterations_limit:
+            try:
+                f = f_num(x)
+                derivada = df_num(x)
+                segunda_derivada = df2_num(x)
+
+                if f is None or derivada is None or segunda_derivada is None:
+                    return ResponseManager.error_response(f"Error: Function or derivatives returned None at x = {x}.")
+
+                denominator = derivada**2 - f * segunda_derivada
+                if abs(denominator) < 1e-10:  # Avoid division by zero
+                    return ResponseManager.error_response(f"Failed to converge: denominator too small at iteration {iteration}.")
+
+                # Update x using the corrected formula
+                x_new = x - (f * derivada) / denominator
+                Error = abs(x_new - x)
+                x = x_new
+                xn.append(x)
+                iteration += 1
+                table.append([iteration, x, f, Error])
+            except Exception as e:
+                return ResponseManager.error_response(f"Error during iteration {iteration}: {e}") """

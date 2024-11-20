@@ -15,11 +15,32 @@ def jacobi(request):
     ]
 
     try:
-        if request.POST:
-            # TODO: Get the inputs
-            # TODO: Implement Jacobi method
-            # TODO: Implement the response
+        if request.method == 'POST':
+            # Obtener las entradas del usuario
+            A_string = request.POST.get('A')
+            b_string = request.POST.get('b')
+            x0_string = request.POST.get('x0')
+            Tol = float(request.POST.get('tolerance'))
+            niter = int(request.POST.get('iterations_limit'))
+
+            # Convertir las entradas en matrices y vectores NumPy
+            A = MatricesManager.parse_matrix(A_string)
+            b = MatricesManager.parse_vector(b_string)
+            x0 = MatricesManager.parse_vector(x0_string)
+
+            # Validar las entradas
+            if not MatricesManager.is_square_matrix(A):
+                raise ValueError("The matrix A must be square.")
+            if not MatricesManager.are_dimensions_compatible(A, b, x0):
+                raise ValueError("The dimensions of A, b and x0 are not compatible.")
+
+            # Llamar al método SOR
+            response = SystemsEquationsMethods.jacobi(x0, A, b, Tol, niter)
+            template_data.update(response)
+
+            template_data['table_headers'] = ['Iteration', 'x', 'Error']
             return render(request, "systems_equations/jacobi.html", {"template_data": template_data})
+        
         else:
             template_data["response"] = ResponseManager.error_response("All the inputs must have a value.")
             return render(request, "systems_equations/jacobi.html", {"template_data": template_data})
